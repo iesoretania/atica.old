@@ -1,0 +1,38 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li><a ng-href="#/activity">Actividades</a> <span class="divider">/</span></li>
+      <li class="active">{{d.activities[$routeParams.activityId].displayName}}</li>
+    </ul>
+    <div class="well">
+      <h1>{{d.activities[$routeParams.activityId].displayName}}</h1>
+      <small class="muted">
+        {{d.activities[$routeParams.activityId].description}}
+      </small>
+    </div>
+    <div ng-repeat="piece in d.news">
+      <p class="pull-right"><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
+      <!--div class="span4">
+        <h2>{{piece.subject}}</h2>
+        <p>{{piece.body}}</p>
+        <p><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
+      </div -->
+      <h2>{{piece.subject}}</h2>
+      <p>{{piece.body}}</p>
+      <hr />
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

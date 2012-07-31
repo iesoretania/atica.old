@@ -1,0 +1,37 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2"><!-- ng-include src="'partials/navbarmain.html'"-->
+  </div>
+  
+  <!-- Main content -->
+  <div class="span8">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li class="active">Selección de perfil</li>
+    </ul>
+    <div class="well">
+      <h1>Selección de perfil</h1>
+      <small class="muted">
+        Desde aquí podrá listar los perfiles disponibles para su usuario y seleccionar cuál será el perfil activo.
+      </small>
+    </div>
+    <form name="profileGroupsForm">
+      <div class="well well-small" ng-repeat="organizationId in d.user.organizations" ng-show="d.user.profiles[organizationId].length>0">
+        <p><b>{{d.organizations[organizationId].displayName}}</b></p>
+        <p ng-repeat="profileId in d.user.profiles[organizationId]">
+          <input type="radio" ng-model="d.user.currentProfileId" value="{{profileId}}" id="elem{{d.profiles[profileId]}}">&nbsp;<!--label for="elem{{profileid}}"-->{{d.profileGroups[d.profiles[profileId].groupId].displayName[d.user.gender]}}<!--/label-->
+            <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
+          </input> 
+        </p>
+      </div>
+      <input class="btn btn-primary" type="button" value="Comenzar" ng-click="setLocation('#/home')"></input>
+    </form>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+<!DOCTYPE HTML> 
+<!--
+/**
+ * ATICA client web app.
+ *
+ * @package   atica
+ * @copyright 2012 Luis-Ramon Lopez Lopez
+ * @license   http://www.fsf.org/licensing/licenses/agpl-3.0.html GNU Affero GPL 3
+ */
+-->
+<html lang="es" ng-app="aticaApp">
+<head>
+  <!-- HTML5 shim, for IE6-8 support of HTML elements -->
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <meta charset="utf-8">
+  <title>&Aacute;TICA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css" />
+  <link rel="shortcut icon" href="themes/default/images/favicon.ico" />
+  <link rel="apple-touch-icon" href="themes/default/images/mobile-favicon.png" />
+  <link rel="stylesheet" href="css/app.css" />
+  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-responsive.css" />
+</head>
+<body ng-controller='MainViewCtrl'>
+  <div class="navbar navbar-fixed-top" ng-cloak>
+      <div class="navbar-inner">
+          <div class="container">
+              <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </a>
+              <a class="brand" href="#">&Aacute;TICA</a>
+              <!-- Dropdown menu when user has logged in -->
+              <div class="btn-group pull-right" ng-show="d.user.userName">
+                <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                  <i class="icon-user"></i> {{d.user.userName}}
+                  <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu">
+                  <li><a ng-href="#/profile"><b>{{d.user.displayName}}</b></a></li>
+                  <li><a ng-href="#/selectprofile"><b>{{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName}}</b></a></li>
+                  <li><a ng-href="#/selectprofile">Perfil: <b>{{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}</b></a></li>
+                  <li class="divider"></li>
+                  <li><a ng-href="#/notifications">Notificaciones <span ng-show="d.user.notifications.length>0" class="badge badge-info">{{d.user.notifications.length}}</span></a></li>
+                  <li>
+                    <a ng-href="#/logout" ng-click="d.user=false">Salir</a>
+                  </li>
+                </ul>
+              </div>
+              <!-- Dropdown menu for guest user -->
+              <div class="nav pull-right" ng-show="!d.user.userName">
+                <div class="dropdown" id="login">
+                  <a class="btn dropdown-toggle loginform" data-toggle="dropdown" href="#login">
+                    <i class="icon-user"></i> Entrar en la aplicación
+                    <span class="caret"></span>
+                  </a>
+                  <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
+                    <form action="login" method="post" accept-charset="UTF-8">
+                      <b class="loginfield">Nombre de usuario:</b><br/>
+                      <input id="username" style="margin-bottom: 15px;" type="text" name="username" size="30" placeholder="El mismo usado en Séneca" />
+                      <b class="loginfield">Contraseña:</b><br/>
+                      <input id="userpassword" style="margin-bottom: 15px;" type="password" name="username" size="30" />
+                      <input class="btn btn-primary loginbutton" style="clear: left; width: 100%; height: 32px; font-size: 13px;" type="button" name="commit" value="Entrar" ng-click="login()" autocomplete="off" data-loading-text="Conectando..." />
+                    </form>
+                  </div>
+                </div>
+              </div>
+              <!-- Top navbar -->
+              <div class="nav-collapse">
+                  <ul class="nav">
+                      <li ng-class="isActive($location,'/home')"><a href="#">Inicio</a></li>
+                      <li ng-class="isActive($location,'/browser')"><a href="#/browser">Documentos</a></li>
+                      <!-- Profile dropdown -->
+                      <li class="dropdown" ng-show="d.user.userName">
+                          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                              Perfiles
+                              <b class="caret"></b>
+                          </a>
+                          <ul class="dropdown-menu">
+                            <span ng-repeat="organizationId in d.user.organizations">
+                              <li class="divider" ng-show="$index>0 && d.user.profiles[organizationId].length>0"></li>
+                              <li ng-show="d.user.profiles[organizationId].length>0 && d.user.organizations.length>1">
+                                <a href="" class="dont-click" style="font-weight: bold; color: #888888">{{d.organizations[organizationId].displayName}}</a>
+                              </li>
+                              <li ng-repeat="profileId in d.user.profiles[organizationId]">
+                              <a href="" ng-click="d.user.currentProfileId=profileId">{{d.profileGroups[d.profiles[profileId].groupId].displayName[d.user.gender]}}
+                                <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
+                                <i class="icon-ok" ng-show="profileId==d.user.currentProfileId"></i>
+                              </a>
+                              </li>
+                            </span>
+                          </ul>
+                      </li>
+                      <!--li ng-show="user"><a href="#/tools">Herramientas</a></li-->
+                      <!--li class="divider-vertical"></li-->
+                  </ul>
+                  
+                  <form class="navbar-search pull-left" ng-show="d.user.userName">
+                    <input type="text" class="search-query span2" placeholder="Buscar...">
+                  </form>
+
+                  <p class="navbar-text pull-right" ng-show="d.user.userName">
+                    <!--b>{{user.displayname}}</b><span ng-show="user.currentProfileGroup"> - </span--><b>{{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
+                    <span ng-show="d.profiles[d.user.currentProfileId].displayName.length>0"> ({{d.profiles[d.user.currentProfileId].displayName}})</span>
+                    </b>
+                    &nbsp;&nbsp;
+                  </p>
+                  <p class="navbar-text pull-right" ng-show="!d.user.userName">
+                    <b>{{d.organizations[1].displayname}}</b>&nbsp;&nbsp;
+                  </p>
+              </div><!--/.nav-collapse -->
+          </div>
+      </div>
+  </div>
+
+  <div class="container-fluid" ng-view>
+  </div>
+  <script src="lib/jquery/jquery-1.7.2.min.js"></script>
+  <script src="lib/underscore/underscore-min.js"></script>
+  <script src="lib/angular/angular.js"></script>
+  <script src="lib/angular/angular-resource.js"></script>
+  <!--script src="lib/angular/i18n/angular-locale-es.js"></script -->
+  <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/services.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+  <script src="js/directives.js"></script>
+</body>
+</html>

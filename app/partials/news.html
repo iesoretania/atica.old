@@ -1,0 +1,37 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li class="active">Noticias</li>
+    </ul>
+    <div class="well">
+      <h1>Novedades</h1>
+      <small class="muted">
+        Desde aquí podrá informarse de las novedades del {{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName || "centro"}}.
+      </small>
+    </div>
+    <div ng-repeat="piece in d.news">
+      <p class="pull-right"><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
+      <!--div class="span4">
+        <h2>{{piece.subject}}</h2>
+        <p>{{piece.body}}</p>
+        <p><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
+      </div -->
+      <h2>{{piece.subject}} <small time-ago from-time="{{piece.when}}"></small></h2>
+      <p>{{piece.body}}</p>
+      <hr />
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

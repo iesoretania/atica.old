@@ -1,0 +1,71 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li>
+        <a ng-href="#/calendar">Calendario</a> <span class="divider">/</span>
+      </li>
+      <li class="active">{{d.events[$routeParams.eventId].displayName}}</li>
+    </ul>
+    <div class="well">
+      <h1>{{d.events[$routeParams.eventId].displayName}}</h1>
+      <small class="muted">
+        {{d.events[$routeParams.eventId].description || "Toda la información acerca de la actividad."}}
+      </small>
+    </div>
+    <div>
+      <!-- Filter/show options -->
+      <form class="form-horizontal">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="checkdone">Opciones de visualización</label> 
+            <div class="controls">
+              <label class="checkbox">
+                <input name="checkdone" type="checkbox" ng-model="hidedone"></input>
+                Mostrar sólo acciones no marcadas como realizadas
+              </label>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="checkdone">Semanas mostradas</label> 
+            <div class="controls">
+              <select name="duration" ng-model="calViewDuration" ng-options="du.duration as du.displayname for du in [{displayname: 'Un mes', duration: 4},{displayname: 'Dos meses', duration: 8},{displayname: 'Tres meses', duration: 12}]"></select>
+            </div>
+        </fieldset>
+      </form>
+
+      <!-- Information about the shown events -->
+      <div class="well well-small" ng-show="filteredEvents==0">
+        <strong ng-pluralize count="d.events.length"
+              when="{'0': 'No hay ninguna actividad asociada a ninguno de sus perfiles.',
+               'one': 'Hay una actividad asociada a sus perfiles, pero no está en vigor en el período mostrado o no cumple las condiciones indicadas.',
+               'other': 'Hay un total de {} actividades asociadas a sus perfiles, pero ninguna está en vigor en el período mostrado o no cumplen las condiciones indicadas.'}"></strong>
+      </div>
+      <div class="well well-small" ng-show="filteredEvents>0">
+        <strong ng-pluralize count="filteredEvents"
+              when="{
+              'one': 'Mostrando una actividad activa en este período y que cumple las condiciones indicadas. ',
+              'other': 'Mostrando {} actividades asociadas activas en este período y que cumplen las condiciones indicadas. '}">
+        </strong>
+        <strong ng-pluralize count="d.events.length-filteredEvents"
+              when="{
+              '0': 'No hay otras actividades asociadas a su perfil que no estén a la vista.',
+              'one': 'Tan sólo hay una actividad adicional asociada a su perfil que no está a la vista.',
+              'other': 'Hay {} actividades asociadas adicionales asociadas a su perfil que no están a la vista.'}">
+        </strong>
+      </div>
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

@@ -1,0 +1,57 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li class="active">
+        <a ng-href="#/home">Inicio</a> 
+      </li>
+    </ul>
+    <!-- Welcome -->
+    <div class="well" ng-show="d.user">
+      <h1>{{{0: 'Bienvenido', 1: 'Bienvenida'}[d.user.gender]}} a la plataforma ÁTICA</h1>
+      <small class="muted">
+        Desde aquí podrá obtener y entregar documentos del Sistema de Gestión de la Calidad del {{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName || "centro"}}, así como informarse de las actividades que han de realizarse a lo largo del curso académico.
+      </small>
+    </div>
+    <!-- Guest welcome -->
+    <div class="well" ng-show="!d.user">
+      <h1>Bienvenido/a a la plataforma ÁTICA</h1>
+      <small class="muted">
+        Desde aquí podrá obtener los documentos públicos del centro, incluyendo la misión, las programaciones o los criterios de evaluación.
+      </small>
+    </div>
+    <!-- Last connection -->
+    <div class='pull-right' ng-show="d.user"><b>Su última entrada fue registrada <span time-ago from-time="{{d.user.lastLogin}}"></span></b></div>
+    <!-- First steps -->
+    <div ng-show="d.user"> 
+      <h1>
+        Introducción <small>(primeros pasos)</small>
+      </h1>
+      <p>La parte superior de la página contiene accesos rápidos a esta pantalla de inicio, el árbol de documentos del Sistema de Gestión de la Calidad, el cambio de perfil activo y un menú de herramientas. Tras ello, encontrará un cuadro de texto mediante el cual podrá realizar búsquedas. Finalmente, en el lado derecho, hay un menú desplegable donde podrá obtener información acerca de sus datos personales, permitiendo su rectificación y la salida de la aplicación.</p>
+      <p>No olvide que puede contactar con el coordinador de calidad en cualquier momento en caso de duda.</p>
+      <h1>
+        Nuevos documentos <small>(desde su última entrada)</small>
+      </h1>
+      <h1>
+        Nuevos eventos <small>(desde su última entrada)</small>
+      </h1>
+    </div>
+    <!-- First steps for guests -->
+    <div ng-show="!d.user"> 
+      <h1>
+        Introducción <small>(primeros pasos)</small>
+      </h1>
+      <p>La parte superior de la página contiene accesos rápidos a esta pantalla de inicio y al árbol de documentos del Sistema de Gestión de la Calidad. En el lado izquierdo encontrará una barra lateral que le permitirá acceder a las distintas secciones.</p>
+      <p>No olvide que puede contactar con el coordinador de calidad en cualquier momento en caso de duda.</p>
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

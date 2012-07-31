@@ -1,0 +1,171 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li class="active">Calendario</li>
+    </ul>
+    <div class="well">
+      <h1>Calendario de actividades</h1>
+      <small class="muted">
+        Desde esta sección podrá determinar cuáles son las actividades del {{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName}} relacionadas con el Sistema de Gestión de la Calidad que se corresponden a cada periodo de tiempo.
+      </small>
+    </div>
+    <div>
+      <!-- Filter/show options -->
+      <form class="form-horizontal">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="checkdone">Opciones de visualización</label> 
+            <div class="controls">
+              <label class="checkbox">
+                <input name="checkdone" type="checkbox" ng-model="hidedone"></input>
+                Mostrar sólo acciones no marcadas como realizadas
+              </label>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="checkdone">Semanas mostradas</label> 
+            <div class="controls">
+              <select name="duration" ng-model="calViewDuration" ng-options="du.duration as du.displayname for du in [{displayname: 'Un mes', duration: 4},{displayname: 'Dos meses', duration: 8},{displayname: 'Tres meses', duration: 12},{displayname: 'Seis meses', duration: 24},{displayname: 'Un año', duration: 48}]"></select>
+            </div>
+        </fieldset>
+      </form>
+
+      <!-- Information about the shown events -->
+      <div class="well well-small" ng-show="filteredEvents==0">
+        <strong ng-pluralize count="d.events.length"
+              when="{'0': 'No hay ninguna actividad asociada a ninguno de sus perfiles.',
+               'one': 'Hay una actividad asociada a sus perfiles, pero no está en vigor en el período mostrado o no cumple las condiciones indicadas.',
+               'other': 'Hay un total de {} actividades asociadas a sus perfiles, pero ninguna está en vigor en el período mostrado o no cumplen las condiciones indicadas.'}"></strong>
+      </div>
+      <div class="well well-small" ng-show="filteredEvents>0">
+        <strong ng-pluralize count="filteredEvents"
+              when="{
+              'one': 'Mostrando una actividad activa en este período y que cumple las condiciones indicadas. ',
+              'other': 'Mostrando {} actividades asociadas activas en este período y que cumplen las condiciones indicadas. '}">
+        </strong>
+        <strong ng-pluralize count="getSize(d.events)-filteredEvents"
+              when="{
+              '0': 'No hay otras actividades asociadas a sus perfiles que no estén a la vista.',
+              'one': 'Tan sólo hay una actividad adicional asociada a sus perfiles que no está a la vista.',
+              'other': 'Hay {} actividades asociadas adicionales asociadas a su perfil que no están a la vista.'}">
+        </strong>
+      </div>
+
+      <!-- Pagers for week browsing if there are any displayed events -->
+      <ul class="pager" ng-show="filteredEvents>0">
+        <li class="previous">
+          <a href="" ng-show="showPrevious()" ng-click="prevWeek()">&larr; Antes</a>
+        </li>
+        <li class="previous">
+          <a   href="" ng-show="showPrevious()" ng-click="prevMonth()">&larr; Mes anterior</a>
+        </li>
+        <li class="next">
+          <a href="" ng-show="showNext()" ng-click="nextWeek()">Después &rarr;</a>
+        </li>
+        <li class="next">
+          <a href="" ng-show="showNext()" ng-click="nextMonth()">Mes siguiente &rarr;</a>
+        </li>
+      </ul>
+
+      <!-- Top tabs for selecting filter by profile -->
+      <div class="tabbable" style="margin-bottom: 9px;">
+        <ul class="nav nav-tabs">
+          <li ng-class="{active: filterbyids.length==0}">
+            <a data-toggle="tab" ng-href="#" ng-click="filterbyids=[]; otherprofile=''; ownprofile=''">Ver de todos mis perfiles</a>
+          </li>
+          <li class="dropdown" ng-class="{active: ownprofile.length>0}">
+            <a class="dropdown-toggle"
+            data-toggle="dropdown" href="#2">
+            Ver sólo un perfil propio
+            <span ng-show="ownprofile.length>0">: {{ownprofile}}</span>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-repeat="profileid in getProfileGroups(d.user.profiles)">
+            <a ng-href="" ng-click="$parent.filterbyids=d.profileGroups[profileid].events; $parent.ownprofile=d.profileGroups[profileid].displayName[user.gender]; $parent.otherprofile=''">{{d.profileGroups[profileid].displayName[d.user.gender]}}
+              <span ng-show="d.user.organizations.length>1"> ({{d.organizations[d.profileGroups[profileid].organizationId].displayName}})</span>
+            </a>
+            </li>
+          </ul>
+        </li>
+
+        <li class="dropdown" ng-class="{active: otherprofile.length>0}">
+          <a class="dropdown-toggle"
+            data-toggle="dropdown" href="#3">
+            Ver otros perfiles
+            <span ng-show="otherprofile.length>0">: {{otherprofile}}</span>
+            <b class="caret"></b>
+          </a>
+          <ul class="dropdown-menu">
+            <li ng-repeat="profileid in getOtherProfileGroups(d.user.profiles)">
+            <a ng-href="" ng-click="$parent.filterbyids=d.profileGroups[profileid].events; $parent.otherprofile=d.profileGroups[profileid].displayName[2]; $parent.ownprofile=''">{{d.profileGroups[profileid].displayName[2]}}
+              <span ng-show="d.user.organizations.length>1"> ({{d.organizations[d.profileGroups[profileid].organizationId].displayName}})</span>
+            </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <!-- Main calendar view -->
+      <div class="tab-content"></div>
+      <table class="table table-condensed" style="table-layout: fixed">
+
+        <!-- Weeks header -->
+        <thead>
+          <tr week-names week-start="{{calViewStart}}" week-count="{{calViewDuration}}"></tr>
+        </thead>
+
+        <!-- Display filtered events -->
+        <tbody>
+          <tr ng-repeat="event in d.events | weekfilter:filterbyids:hidedone:calViewStart:calViewDuration:calFirstWeek:setFilteredCount" class="eventrow">
+            <td ng-repeat="jump in [] | fillrow:calstart:getEventSkippedWeeks(event):true" colspan="{{jump}}" class="monthstart"></td>
+            <td colspan="{{getEventWeeks(event)}}" ng-class="getEventClasses(event)" class="event">
+              <a ng-href="#/calendar/{{event.id}}" class="autopop" bs-popover rel="popover" data-content="{{event.description || 'No hay descripción disponible'}}" data-original-title="{{event.displayName}}" data-placement="top">              
+                <span ng-show="getEventSkippedWeeks(event)<0">← </span>
+                {{event.displayName}}
+                <span ng-show="getEventOverflow(event)>0"> →</span>
+              </a>
+            </td>
+            <td ng-repeat="jump in [] | fillrow:event.start+getEventWeeks(event):getEventFilledWeeks(event):false" colspan="{{jump}}" class="monthstart"></td> 
+          </tr>
+        </tbody>
+
+        <!-- Show another weeks header if there are more than 5 displayed events -->
+        <tfoot>
+          <!--tr ng-show="filteredEvents>5" ng-bind-html-unsafe="weekNames(calstart,calViewDuration)" -->
+          <tr ng-show="$parent.filteredEvents>2" week-names week-start="{{calViewStart}}" week-count="{{calViewDuration}}"></tr>
+          </tr>
+        </tfoot>
+      </table>
+
+      <!-- Show another week browsing pager -->
+      <ul class="pager">
+        <li class="previous">
+          <a href="" ng-show="showPrevious()" ng-click="prevWeek()">&larr; Antes</a>
+        </li>
+        <li class="previous">
+          <a href="" ng-show="showPrevious()" ng-click="prevMonth()">&larr; Mes anterior</a>
+        </li>
+        <li class="next">
+          <a href="" ng-show="showNext()" ng-click="nextWeek()">Después &rarr;</a>
+        </li>
+        <li class="next">
+          <a href="" ng-show="showNext()" ng-click="nextMonth()">Mes siguiente &rarr;</a>
+        </li>
+      </ul>
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>

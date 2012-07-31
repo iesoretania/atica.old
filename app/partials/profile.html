@@ -1,0 +1,37 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2" ng-include src="'partials/navbarmain.html'">
+  </div>
+  
+  <!-- Main content -->
+  <div class="span10">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li>
+        <span ng-show="user.islocaladmin==true"><a ng-href="#/admin/users">Usuarios</a></span>
+        <span ng-show="user.islocaladmin==false">Usuarios</span>
+        <span class="divider">/</span>
+      </li>
+      <li class="active">{{username}}
+      </li>
+    </ul>
+    <div class="well">
+      <h1>Datos del perfil</h1>
+      <small class="muted">
+        <span ng-show="username != user.username">
+          Desde aquí podrá mostrar y modificar los datos personales asociados al usuario ({{username}}).
+        </span>
+        <span ng-show="username == user.username">
+          Desde aquí podrá mostrar y modificar los datos personales asociados a su nombre de usuario.
+        </span>
+      </small>
+    </div>
+    <hr />
+    <footer>
+      <p>&copy; Luis Ramón López López, 2009-2012</p>
+    </footer>
+  </div>
+</div>
