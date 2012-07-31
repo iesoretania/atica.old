@@ -1,44 +1,44 @@
 
-  <ul class="nav nav-list" ng-show="d.user">
-    <li class="nav-header nav-header-small">
-      General
-    </li>
-    <li ng-class="isActive($location,'/home')">
-      <a ng-href="#/home"><i class="icon-home"></i>Inicio</a>
-    </li>
-    <li ng-class="isActive($location,'/news')">
-      <a ng-href="#/news"><i class="icon-book"></i>Noticias</a>
-    </li>
-    <li ng-class="isActive($location,'/calendar')" >
-      <a ng-href="#/calendar"><i class="icon-calendar"></i>Calendario <span class="badge badge-warning" ng-show="countNotDoneEvents()>0">{{countNotDoneEvents()}}</span>&nbsp;<span class="badge badge-important" ng-show="countPastNotDoneEvents()>0">{{countPastNotDoneEvents()}}</span></a>
-    </li>
-    <li ng-class="isActive($location,'/notifications')" >
-      <a ng-href="#/notifications"><i class="icon-envelope"></i>Notificaciones <span class="badge badge-info" ng-show="d.user.notifications.length>0">{{d.user.notifications.length}}</span></a>
-    </li>
-  </ul>
-  <ul class="nav nav-list" animate-on-change="{{d.user.currentProfileId}}">
-    <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities.length>0" >
-      Actividades {{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
-    </li>
-    <li ng-repeat="activityId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities" ng-class="isActive($location,'/activity/{{activityId}}')">
-      <a ng-href="#/activity/{{activityId}}">{{d.activities[activityId].displayName}}</a>
-    </li>
-  </ul>
-  <ul class="nav nav-list" ng-show="d.user">  
-    <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents.length>0">
-      Secciones
-    </li>
-    <li ng-repeat="documentId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents" ng-class="isActive($location,'/section/{{documentId}}')">
-      <a ng-href="#/section/{{documentId}}">{{d.documents[documentId].displayName}}</a>
-    </li>
-    <li class="divider"></li>
-  </ul>
-  <ul class="nav nav-list" ng-show="!d.user">  
-    <li class="nav-header nav-header-small" ng-show="d.guestdocuments.length>0">
-      Secciones
-    </li>
-    <li ng-repeat="documentid in d.guestdocuments" ng-class="isActive($location,'/section/{{documentid}}')" >
-      <a ng-href="#/section/{{documentid}}">{{d.documents[documentid].displayName}}</a>
-    </li>
-    <li class="divider"></li>
-  </ul>
+<ul class="nav nav-list" ng-show="d.user">
+  <li class="nav-header nav-header-small">
+    General
+  </li>
+  <li ng-class="isActive($location,'/home')">
+    <a ng-href="#/home"><i class="icon-home"></i>Inicio</a>
+  </li>
+  <li ng-class="isActive($location,'/news')">
+    <a ng-href="#/news"><i class="icon-book"></i>Noticias</a>
+  </li>
+  <li ng-class="isActive($location,'/calendar')" >
+    <a ng-href="#/calendar"><i class="icon-calendar"></i>Calendario <span class="badge badge-warning" ng-show="countNotDoneEvents()>0">{{countNotDoneEvents()}}</span>&nbsp;<span class="badge badge-important" ng-show="countPastNotDoneEvents()>0">{{countPastNotDoneEvents()}}</span></a>
+  </li>
+  <li ng-class="isActive($location,'/notifications')" >
+    <a ng-href="#/notifications"><i class="icon-envelope"></i>Notificaciones <span class="badge badge-info" ng-show="d.user.notifications.length>0">{{d.user.notifications.length}}</span></a>
+  </li>
+</ul>
+<ul class="nav nav-list" animate-on-change="{{d.user.currentProfileId}}">
+  <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities.length>0" >
+    Actividades {{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
+  </li>
+  <li ng-repeat="activityId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities" ng-class="isActive($location,'/activity/{{activityId}}')">
+    <a ng-href="#/activity/{{activityId}}">{{d.activities[activityId].displayName}}</a>
+  </li>
+</ul>
+<ul class="nav nav-list" ng-show="d.user">  
+  <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents.length>0">
+    Secciones
+  </li>
+  <li ng-repeat="documentId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents" ng-class="isActive($location,'/section/{{documentId}}')">
+    <a ng-href="#/section/{{documentId}}">{{d.documents[documentId].displayName}}</a>
+  </li>
+  <li class="divider"></li>
+</ul>
+<ul class="nav nav-list" ng-show="!d.user">  
+  <li class="nav-header nav-header-small" ng-show="d.guestdocuments.length>0">
+    Secciones
+  </li>
+  <li ng-repeat="documentid in d.guestdocuments" ng-class="isActive($location,'/section/{{documentid}}')" >
+    <a ng-href="#/section/{{documentid}}">{{d.documents[documentid].displayName}}</a>
+  </li>
+  <li class="divider"></li>
+</ul>

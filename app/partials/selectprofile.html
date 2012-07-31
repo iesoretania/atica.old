@@ -3,7 +3,7 @@
   <!-- Sidebar -->
   <div class="span2"><!-- ng-include src="'partials/navbarmain.html'"-->
   </div>
-  
+
   <!-- Main content -->
   <div class="span8">
     <ul class="breadcrumb">
@@ -23,7 +23,7 @@
         <p><b>{{d.organizations[organizationId].displayName}}</b></p>
         <p ng-repeat="profileId in d.user.profiles[organizationId]">
           <input type="radio" ng-model="d.user.currentProfileId" value="{{profileId}}" id="elem{{d.profiles[profileId]}}">&nbsp;<!--label for="elem{{profileid}}"-->{{d.profileGroups[d.profiles[profileId].groupId].displayName[d.user.gender]}}<!--/label-->
-            <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
+          <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
           </input> 
         </p>
       </div>
