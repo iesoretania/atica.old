@@ -19,15 +19,44 @@
         {{d.activities[$routeParams.activityId].description}}
       </small>
     </div>
-    <div ng-repeat="piece in d.news">
-      <p class="pull-right"><a class="btn btn-inverse" href="#">Descartar</a><a class="btn btn-success" href="#">Comentar</a></p>
-      <!--div class="span4">
+    <div class="framed" ng-repeat="folderId in d.activities[$routeParams.activityId].folders">
+      <!--p class="pull-right"><a class="btn btn-inverse" href="#">Descartar</a><a class="btn btn-success" href="#">Comentar</a></p>
+      <div class="span4">
         <h2>{{piece.subject}}</h2>
         <p>{{piece.body}}</p>
         <p><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
       </div -->
-      <h2>{{piece.subject}}</h2>
-      <p>{{piece.body}}</p>
+      <h2>{{d.folders[folderId].displayName}}</h2>
+      <form>
+        <div class="pull-right">
+          <select>
+            <option>Todos los documentos</option>
+            <option>Solo los míos</option>
+          </select>
+        </div>
+      </form>
+      <p>{{d.folders[folderId].description}}</p>
+
+      <table class="table table-striped table-hover table-condensed" ng-show="d.deliveries[folderId]">
+        <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Últ. cambio</th>
+            <th></th>
+            <th>Enviado por</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="delivery in d.deliveries[folderId]">
+            <td>{{delivery.displayName}}</td>
+            <td time-ago from-time="{{delivery.creationDate}}" title="{{delivery.creationDate}}"></td>
+            <td></td>
+            <td>{{d.users[delivery.uploaderPersonId].displayName}}</td>
+            <td><i class="icon-pencil"></i> <i class="icon-trash"></i></td>
+          </tr>
+        </tbody>
+      </table>
       <hr />
     </div>
     <hr />

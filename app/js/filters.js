@@ -8,31 +8,25 @@ angular.module('aticaApp.filters', []).
       return String(text).replace(/\%VERSION\%/mg, version);
     }
   }]).
-  filter('test', function() {
-  		return function(item) {
-  			return _.filter(item, function(num){ return num % 2 == 1; });//[98];//  			return (item.id % 2)==0;
-  		}
-  	}
-  ).
   filter('weekfilter', function() {
-      return function(items, ids, hidedone, calstart, calViewDuration, calfirst, setfilteredcount) {
-        items = _.filter(items, function(ev) {
-          var normeventstart = (ev.start-calfirst+48) % 48;
-          var normcalstart = (calstart-calfirst+48) % 48;
-          var ok = (normeventstart < normcalstart+calViewDuration) &&
-                   ((normeventstart+ev.duration) > normcalstart);
-          //ok = true;
-          if (ids.length>0) {
-            ok = ok && (_.indexOf(ids, ev.id)!=-1); 
-          }
-          if (hidedone) {
-            ok = ok && (ev.done == false); 
-          }
-          return ok; 
-        });
-        setfilteredcount(items.length);
-        return items;
-      }
+    return function(items, ids, hidedone, calstart, calViewDuration, calfirst, setfilteredcount) {
+      items = _.filter(items, function(ev) {
+        var normeventstart = (ev.start-calfirst+48) % 48;
+        var normcalstart = (calstart-calfirst+48) % 48;
+        var ok = (normeventstart < normcalstart+calViewDuration) &&
+        ((normeventstart+ev.duration) > normcalstart);
+        //ok = true;
+        if (ids.length>0) {
+          ok = ok && (_.indexOf(ids, ev.id)!=-1); 
+        }
+        if (hidedone) {
+          ok = ok && (ev.done == false); 
+        }
+        return ok; 
+      });
+      setfilteredcount(items.length);
+      return items;
+    }
   }).
   filter('fillrow', function() {
     return function(elem, startweek, duration) {
@@ -64,5 +58,5 @@ angular.module('aticaApp.filters', []).
       }
       //if (log) console.log(result);
       return result;
-  }
-});
+    }
+  });
