@@ -16,8 +16,7 @@ angular.module('aticaApp.directives', []).
   }).
   directive('timeAgo', ['timeAgoService', function(timeago) {
     return {
-      //replace: true,
-      //priority: 0,
+      replace: true,
       scope: {
         "fromTime":"@"
       },
@@ -30,7 +29,6 @@ angular.module('aticaApp.directives', []).
               value = scope.timeago.nowTime-scope.fromTime;
               $(linkElement).text(scope.timeago.inWords(value));
             }
-          //console.log("timeAgo: "+scope.timeago.nowTime+"-"+scope.fromTime+"="+value);
           });
         }
       }

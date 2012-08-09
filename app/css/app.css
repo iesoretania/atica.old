@@ -100,13 +100,22 @@ b.loginfield {
   line-height: 14px !important;
 }
 
-input.loginbutton {
+input.cancelbutton {
+  margin-top: 5px !important;
+}
+
+input.loginbutton, input.cancelbutton {
   clear: left;
   width: 100%;
   height: 32px;
   font-size: 13px;
   margin: 0 !important;
 }
+
+input.cancelbutton {
+  margin-top: 5px !important;
+}
+
 div.framed {
   position: relative;
   margin: 15px 0;

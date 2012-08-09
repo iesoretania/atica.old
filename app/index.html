@@ -46,7 +46,7 @@
               <li class="divider"></li>
               <li><a ng-href="#/notifications">Notificaciones <span ng-show="d.user.notifications.length>0" class="badge badge-info">{{d.user.notifications.length}}</span></a></li>
               <li>
-                <a ng-href="#/logout" ng-click="d.user=false">Salir</a>
+                <a ng-href="#/logout" ng-click="d.user=false;d.logindata=false">Salir</a>
               </li>
             </ul>
           </div>
@@ -58,12 +58,22 @@
                 <span class="caret"></span>
               </a>
               <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-                <form action="login" method="post" accept-charset="UTF-8">
-                  <b class="loginfield">Nombre de usuario:</b><br/>
-                  <input id="username" style="margin-bottom: 15px;" type="text" name="username" size="30" placeholder="El mismo usado en Séneca" />
+                <form class="form-horizontal">
+                  <b class="loginfield">Usuario:</b><br/>
+                  <input id="username" style="margin-bottom: 15px;" type="text" name="username" ng-disabled="d.logindata" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
                   <b class="loginfield">Contraseña:</b><br/>
-                  <input id="userpassword" style="margin-bottom: 15px;" type="password" name="username" size="30" />
-                  <input class="btn btn-primary loginbutton" type="button" name="commit" value="Entrar" ng-click="login()" autocomplete="off" data-loading-text="Conectando..." />
+                  <input id="userpassword" style="margin-bottom: 15px;" type="password" name="password" ng-disabled="d.logindata" size="30" ng-model="frm.password"/>
+                  <span ng-repeat="org in d.logindata.snapshots">
+                    <label class="radio">
+                    <input type="radio" name="organization" id="org{{$index}}" ng-model="d.logindata.org" value="{{$index}}"/>
+                    {{org.Organization.DisplayName}}</label>
+                  </span>
+                  <select style="margin-bottom: 15px;" ng-show="d.logindata" ng-model="d.logindata.snap" ng-options="c.Id as c.DisplayName for c in d.logindata.snapshots[d.logindata.org].Snapshots">
+                    
+                  </select>
+                  <input class="btn btn-primary loginbutton" type="submit" name="commit" value="Comprobar" ng-hide="d.logindata" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
+                  <input class="btn btn-primary loginbutton" type="submit" name="commit" value="Entrar" ng-show="d.logindata" ng-click="login(frm.username,frm.password,d.logindata.snap)" autocomplete="off" data-loading-text="Conectando..." />
+                  <input class="btn btn-danger cancelbutton" type="button" name="cancel" value="Cancelar" ng-show="d.logindata" ng-click="d.logindata=undefined; frm=undefined" autocomplete="off" />
                 </form>
               </div>
             </div>
@@ -122,6 +132,7 @@
     <script src="lib/underscore/underscore-min.js"></script>
     <script src="lib/angular/angular.js"></script>
     <script src="lib/angular/angular-resource.js"></script>
+    <script src="lib/angular/i18n/angular-locale_es-es.js"></script>
     <!--script src="lib/angular/i18n/angular-locale-es.js"></script -->
     <script src="lib/bootstrap/js/bootstrap.min.js"></script>
     <script src="js/app.js"></script>

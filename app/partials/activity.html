@@ -50,7 +50,7 @@
         <tbody>
           <tr ng-repeat="delivery in d.deliveries[folderId]">
             <td>{{delivery.displayName}}</td>
-            <td time-ago from-time="{{delivery.creationDate}}" title="{{delivery.creationDate}}"></td>
+            <td time-ago from-time="{{delivery.creationDate}}" title="{{$parent.delivery.creationDate | date:'medium'}}"></td>
             <td></td>
             <td>{{d.users[delivery.uploaderPersonId].displayName}}</td>
             <td><i class="icon-pencil"></i> <i class="icon-trash"></i></td>

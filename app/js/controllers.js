@@ -43,7 +43,7 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
     var matchlength = partialpath.length;
     var matched = mylocation.path().substring(0,matchlength)==partialpath;
 
-    //console.log("$"+mylocation.path().substring(0,matchlength)+"$=$"+partialpath+"$");
+    console.log("$"+mylocation.path().substring(0,matchlength)+"$=$"+partialpath+"$");
     // Check for trailing slash, which means partial match
     if (matched && (mylocation.path().length>matchlength)) {
       matched = mylocation.path()[matchlength]=='/';
@@ -62,8 +62,14 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
     return _.size(a);
   }
 
-  $scope.login = function() {
-    user.login();
+  $scope.login = function(username, pass,  snap) {
+    user.login(username, pass, snap, function() {
+      $('input.loginbutton').button('reset');
+      
+    },
+    function() {
+      $('input.loginbutton').button('reset');
+    });
   }
 
   $scope.$watch('d.user.userName', function(v) {

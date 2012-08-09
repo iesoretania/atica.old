@@ -20,7 +20,7 @@
   <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities.length>0" >
     Actividades {{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
   </li>
-  <li ng-repeat="activityId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities" ng-class="isActive($location,'/activity/{{activityId}}')">
+  <li ng-repeat="activityId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities" ng-class="isActive($location,'/activity/'+activityId)">
     <a ng-href="#/activity/{{activityId}}">{{d.activities[activityId].displayName}}</a>
   </li>
 </ul>
@@ -28,7 +28,7 @@
   <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents.length>0">
     Secciones
   </li>
-  <li ng-repeat="documentId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents" ng-class="isActive($location,'/section/{{documentId}}')">
+  <li ng-repeat="documentId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].documents" ng-class="isActive($location,'/section/'+documentId)">
     <a ng-href="#/section/{{documentId}}">{{d.documents[documentId].displayName}}</a>
   </li>
   <li class="divider"></li>
@@ -37,7 +37,7 @@
   <li class="nav-header nav-header-small" ng-show="d.guestdocuments.length>0">
     Secciones
   </li>
-  <li ng-repeat="documentid in d.guestdocuments" ng-class="isActive($location,'/section/{{documentid}}')" >
+  <li ng-repeat="documentid in d.guestdocuments" ng-class="isActive($location,'/section/'+documentid)" >
     <a ng-href="#/section/{{documentid}}">{{d.documents[documentid].displayName}}</a>
   </li>
   <li class="divider"></li>

@@ -4,6 +4,10 @@
 
 angular.module('aticaApp.services', ['ngResource'], function ($provide) {
   $provide.service('userDataService', ['$resource', '$timeout', function($resource, $timeout) {
+    
+    var loginDataService = $resource('/~ixl03065/3to5/api/index.php/v1/logindata/:userName', {userName:'@username'});
+    var loginService = $resource('/~ixl03065/3to5/api/index.php/v1/login/:userName/:snapShot', {userName:'@username', snapShot:'@snapshot'});    
+    
     var _scope = {};
 
     _scope.user = false;
@@ -318,12 +322,35 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           isGlobalAdmin: false,
           lastLogin: 1342870961366
         };
-        console.log("Activado!");
-        $('input.loginbutton').button('reset');
       },
-      login: function() {
-        console.log("Activando en 3 segundos...");
-        $timeout(this.actualLogin, 3000);
+      login: function(user, pass, snap, okFn, errorFn) {
+        var action;
+        if (snap === undefined) {
+          action = new loginDataService({ 'username': user, 'password': pass});
+        }
+        else {
+          action = new loginService({ 'username': user, 'password': pass, 'snapshot': snap});
+        }
+        var self = this;
+        action.$save(function(result) {
+          // OK
+          if (snap === undefined) {
+          //self.actualLogin();
+            _scope.logindata = result;
+            _scope.logindata.org = 0;
+            _scope.logindata.snap = _scope.logindata.snapshots[0].Snapshots[0].Id;
+          }
+          else {
+            _scope.logindata = undefined;
+            self.actualLogin();
+          }
+          okFn();
+        },
+        function()
+        {
+          // Error
+          errorFn();
+        });
       }
 
     };
@@ -358,14 +385,12 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       },
       doTimeout: function() {
         ref.nowTime = (new Date()).getTime();
-        //console.log("Launched! "+ref.settings.refreshMillis);
         $timeout(ref.doTimeout, ref.settings.refreshMillis);
       },
       init: function() {
         if (this.initted == false) {
           this.initted = true;
           this.nowTime = (new Date()).getTime();
-          //console.log("Launching...");
           ref = this;
           this.doTimeout();
           this.initted = true;
