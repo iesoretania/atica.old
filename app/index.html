@@ -58,22 +58,23 @@
                 <span class="caret"></span>
               </a>
               <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
-                <form class="form-horizontal">
-                  <b class="loginfield">Usuario:</b><br/>
-                  <input id="username" style="margin-bottom: 15px;" type="text" name="username" ng-disabled="d.logindata" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
-                  <b class="loginfield">Contraseña:</b><br/>
-                  <input id="userpassword" style="margin-bottom: 15px;" type="password" name="password" ng-disabled="d.logindata" size="30" ng-model="frm.password"/>
-                  <span ng-repeat="org in d.logindata.snapshots">
+                <form class="form-horizontal" name="loginform" ng-controller="LoginFormViewCtrl">
+                  <b class="loginfield">Usuario:</b><span class="loginform-error" ng-show="loginform.username.$error.pattern"> ¡No válido!</span><br/>
+                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-pattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" ng-disabled="d.logindata" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
+                  
+                  <b class="loginfield">Contraseña:</b><span class="loginform-error" ng-show="loginform.password.$error.minlength"> ¡Demasiado corta!</span><br/>
+                  <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" ng-disabled="d.logindata" size="30" ng-model="frm.password"/>
+                  <!--<span ng-repeat="org in d.logindata.snapshots">
                     <label class="radio">
                     <input type="radio" name="organization" id="org{{$index}}" ng-model="d.logindata.org" value="{{$index}}"/>
                     {{org.Organization.DisplayName}}</label>
                   </span>
                   <select style="margin-bottom: 15px;" ng-show="d.logindata" ng-model="d.logindata.snap" ng-options="c.Id as c.DisplayName for c in d.logindata.snapshots[d.logindata.org].Snapshots">
                     
-                  </select>
-                  <input class="btn btn-primary loginbutton" type="submit" name="commit" value="Comprobar" ng-hide="d.logindata" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
-                  <input class="btn btn-primary loginbutton" type="submit" name="commit" value="Entrar" ng-show="d.logindata" ng-click="login(frm.username,frm.password,d.logindata.snap)" autocomplete="off" data-loading-text="Conectando..." />
-                  <input class="btn btn-danger cancelbutton" type="button" name="cancel" value="Cancelar" ng-show="d.logindata" ng-click="d.logindata=undefined; frm=undefined" autocomplete="off" />
+                  </select>-->
+                  <input class="btn btn-primary loginbutton" type="submit" name="commit" ng-disabled="loginform.$invalid" value="Comprobar" ng-hide="d.logindata" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
+                  <!--<input class="btn btn-primary loginbutton" type="submit" name="commit" value="Entrar" ng-show="d.logindata" ng-click="login(frm.username,frm.password,d.logindata.snap)" autocomplete="off" data-loading-text="Conectando..." />
+                  <input class="btn btn-danger cancelbutton" type="button" name="cancel" value="Cancelar" ng-show="d.logindata" ng-click="d.logindata=undefined; frm=undefined" autocomplete="off" />-->
                 </form>
               </div>
             </div>

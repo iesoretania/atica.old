@@ -90,6 +90,33 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
 
 MainViewCtrl.$inject = ['$rootScope', '$route', '$routeParams', '$location', 'userDataService'];
 
+function LoginFormViewCtrl($scope, $route, user) {
+  $scope.login = function(username, pass,  snap) {
+    user.login(username, pass, snap, function() {
+      $('input.loginbutton').button('reset');
+      
+    },
+    function() {
+      $('input.loginbutton').button('reset');
+    });
+  }
+
+  /*$scope.$watch('d.user.userName', function(v) {
+    //if (v != undefined) {
+    $scope.setLocation('#/selectprofile');
+  //}
+  });/*/
+
+  $('.dropdown-menu input').click(function(e) {
+    e.stopPropagation();
+  });
+
+  $('input.loginbutton').click(function () {
+    $(this).button('loading');
+  });  
+}
+LoginFormViewCtrl.$inject = ['$scope', '$route', 'userDataService'];
+
 function CalendarViewCtrl($scope, $location) {
   if (!$scope.d.user) {
     $location.path("/home");
