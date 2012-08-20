@@ -15,18 +15,18 @@
     <div class="well" ng-show="d.user">
       <h1>{{{0: 'Bienvenido', 1: 'Bienvenida'}[d.user.gender]}} a la plataforma ÁTICA</h1>
       <small class="muted">
-        Desde aquí podrá obtener y entregar documentos del Sistema de Gestión de la Calidad del {{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName || "centro"}}, así como informarse de las actividades que han de realizarse a lo largo del curso académico.
+        Desde aquí podrá obtener y entregar documentos del Sistema de Gestión de la Calidad del {{d.organization.displayName || "centro"}}, así como informarse de las actividades que han de realizarse a lo largo del curso académico.
       </small>
     </div>
     <!-- Guest welcome -->
     <div class="well" ng-show="!d.user">
       <h1>Bienvenido/a a la plataforma ÁTICA</h1>
       <small class="muted">
-        Desde aquí podrá obtener los documentos públicos del centro, incluyendo la misión, las programaciones o los criterios de evaluación.
+        Desde aquí podrá obtener los documentos públicos del {{d.organization.displayName || "centro"}}, incluyendo la misión, las programaciones o los criterios de evaluación.
       </small>
     </div>
     <!-- Last connection -->
-    <div class='pull-right' ng-show="d.user"><b>Su última entrada fue registrada <span time-ago from-time="{{d.user.lastLogin}}"></span></b></div>
+    <div class='pull-right' ng-show="d.user.lastLogin"><b>Su última entrada fue registrada <span time-ago from-time="{{d.user.lastLogin}}"></span></b></div>
     <!-- First steps -->
     <div ng-show="d.user"> 
       <h1>

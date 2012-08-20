@@ -114,8 +114,9 @@ input.loginbutton, input.cancelbutton {
 
 .loginform-error {
   color: #B94A48 !important;
-  font-size: 80% !important;
+  font-size: 90% !important;
   margin: 0 !important;
+  
 }
 
 input.cancelbutton {
@@ -131,4 +132,13 @@ div.framed {
   -webkit-border-radius: 4px;
   -moz-border-radius: 4px;
   border-radius: 4px;
+}
+
+.profile-selected {
+  color: #000 !important;
+  font-weight: bold;
+}
+.profile-muted {
+  color: #999 !important;
+  display: block !important;
 }

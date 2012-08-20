@@ -3,25 +3,20 @@
   <!-- Sidebar -->
   <div class="span2" ng-include src="'partials/navbarmain.html'">
   </div>
-
+  
   <!-- Main content -->
   <div class="span10">
     <ul class="breadcrumb">
       <li>
         <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
       </li>
-      <li><a ng-href="#/section">Secciones</a> <span class="divider">/</span></li>
-      <li class="active">{{d.groupings[$routeParams.section_id].displayName}}</li>
+      <li class="active">Ha ocurrido un problema</li>
     </ul>
     <div class="well">
-      <h1>{{d.groupings[$routeParams.section_id].displayName}}</h1>
+      <h1>¡Ops! Ha ocurrido un problema</h1>
       <small class="muted">
-        {{d.groupings[$routeParams.section_id].description}}
+        Parece ser que hay problemas de comunicación con el servidor. Pruebe a dar al botón "Atrás" de su navegador e intentar la operación más tarde. ¡Gracias!
       </small>
-    </div>
-    <div ng-repeat="folder in d.groupings[$routeParams.section_id].folders" class="well small-well">
-      <h2>{{folder.displayName}}</h2>
-      <p>{{folder.description}}</p>
     </div>
     <hr />
     <footer>

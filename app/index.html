@@ -41,17 +41,17 @@
             </a>
             <ul class="dropdown-menu">
               <li><a ng-href="#/profile"><b>{{d.user.displayName}}</b></a></li>
-              <li><a ng-href="#/selectprofile"><b>{{d.organizations[d.profileGroups[d.profiles[d.user.currentProfileId].groupId].organizationId].displayName}}</b></a></li>
-              <li><a ng-href="#/selectprofile">Perfil: <b>{{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}</b></a></li>
+              <li><a ng-href="#/selectprofile" disabled="1"><b>{{d.organization.displayName}}</b></a></li>
+              <li><a ng-href="#/selectprofile" ng-show="d.profileId">Perfil: <b>{{d.profileGroups[d.profiles[d.profileId].profileGroupId].displayName[d.user.gender]}}</b></a></li>
               <li class="divider"></li>
-              <li><a ng-href="#/notifications">Notificaciones <span ng-show="d.user.notifications.length>0" class="badge badge-info">{{d.user.notifications.length}}</span></a></li>
+              <li><a ng-href="#/notifications" ng-show="d.profileId">Notificaciones <span ng-show="d.user.notifications.length>0" class="badge badge-info">{{d.user.notifications.length}}</span></a></li>
               <li>
-                <a ng-href="#/logout" ng-click="d.user=false;d.logindata=false">Salir</a>
+                <a ng-href="#/logout" ng-click="logout()">Salir</a>
               </li>
             </ul>
           </div>
           <!-- Dropdown menu for guest user -->
-          <div class="nav pull-right" ng-show="!d.user.userName">
+          <div class="nav pull-right" ng-show="!d.user.userName" ng-disabled="!d.organization">
             <div class="dropdown" id="login">
               <a class="btn dropdown-toggle loginform" data-toggle="dropdown" href="#login">
                 <i class="icon-user"></i> Entrar en la aplicación
@@ -60,19 +60,13 @@
               <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                 <form class="form-horizontal" name="loginform" ng-controller="LoginFormViewCtrl">
                   <b class="loginfield">Usuario:</b><span class="loginform-error" ng-show="loginform.username.$error.pattern"> ¡No válido!</span><br/>
-                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-pattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" ng-disabled="d.logindata" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
-                  
+                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-pattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
+
                   <b class="loginfield">Contraseña:</b><span class="loginform-error" ng-show="loginform.password.$error.minlength"> ¡Demasiado corta!</span><br/>
-                  <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" ng-disabled="d.logindata" size="30" ng-model="frm.password"/>
-                  <!--<span ng-repeat="org in d.logindata.snapshots">
-                    <label class="radio">
-                    <input type="radio" name="organization" id="org{{$index}}" ng-model="d.logindata.org" value="{{$index}}"/>
-                    {{org.Organization.DisplayName}}</label>
-                  </span>
-                  <select style="margin-bottom: 15px;" ng-show="d.logindata" ng-model="d.logindata.snap" ng-options="c.Id as c.DisplayName for c in d.logindata.snapshots[d.logindata.org].Snapshots">
-                    
-                  </select>-->
-                  <input class="btn btn-primary loginbutton" type="submit" name="commit" ng-disabled="loginform.$invalid" value="Comprobar" ng-hide="d.logindata" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
+                  <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" size="30" ng-model="frm.password" placeholder="Si la ha olvidado, avise al coordinador"/>
+                  
+                  <span class="loginform-error" ng-show="frm.error"><b>{{frm.error}}</b><br/></span>
+                  <input class="btn btn-primary loginbutton" type="submit" name="commit" ng-disabled="loginform.$invalid" value="Entrar" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
                   <!--<input class="btn btn-primary loginbutton" type="submit" name="commit" value="Entrar" ng-show="d.logindata" ng-click="login(frm.username,frm.password,d.logindata.snap)" autocomplete="off" data-loading-text="Conectando..." />
                   <input class="btn btn-danger cancelbutton" type="button" name="cancel" value="Cancelar" ng-show="d.logindata" ng-click="d.logindata=undefined; frm=undefined" autocomplete="off" />-->
                 </form>
@@ -91,18 +85,12 @@
                   <b class="caret"></b>
                 </a>
                 <ul class="dropdown-menu">
-                  <span ng-repeat="organizationId in d.user.organizations">
-                    <li class="divider" ng-show="$index>0 && d.user.profiles[organizationId].length>0"></li>
-                    <li ng-show="d.user.profiles[organizationId].length>0 && d.user.organizations.length>1">
-                      <a href="" class="dont-click" style="font-weight: bold; color: #888888">{{d.organizations[organizationId].displayName}}</a>
-                    </li>
-                    <li ng-repeat="profileId in d.user.profiles[organizationId]">
-                      <a href="" ng-click="d.user.currentProfileId=profileId">{{d.profileGroups[d.profiles[profileId].groupId].displayName[d.user.gender]}}
-                        <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
-                        <i class="icon-ok" ng-show="profileId==d.user.currentProfileId"></i>
-                      </a>
-                    </li>
-                  </span>
+                  <li ng-repeat="profileId in d.user.profiles[d.snapshotId]">
+                    <a href="" ng-click="d.profileId=profileId">{{d.profileGroups[d.profiles[profileId].profileGroupId].displayName[d.user.gender]}}
+                      <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
+                      <i class="icon-ok" ng-show="profileId==d.profileId"></i>
+                    </a>
+                  </li>
                 </ul>
               </li>
               <!--li ng-show="user"><a href="#/tools">Herramientas</a></li-->
@@ -114,13 +102,14 @@
             </form>
 
             <p class="navbar-text pull-right" ng-show="d.user.userName">
-              <!--b>{{user.displayname}}</b><span ng-show="user.currentProfileGroup"> - </span--><b>{{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
-                <span ng-show="d.profiles[d.user.currentProfileId].displayName.length>0"> ({{d.profiles[d.user.currentProfileId].displayName}})</span>
+              <!--b>{{user.displayname}}</b><span ng-show="user.currentProfileGroup"> - </span--><b>{{d.profileGroups[d.profiles[d.profileId].profileGroupId].displayName[d.user.gender]}}
+                <span ng-show="d.profiles[d.profileId].displayName.length>0"> ({{d.profiles[d.profileId].displayName}})</span>
               </b>
               &nbsp;&nbsp;
             </p>
             <p class="navbar-text pull-right" ng-show="!d.user.userName">
-              <b>{{d.organizations[1].displayname}}</b>&nbsp;&nbsp;
+              <b>{{d.organization.displayName || "Cargando..."}}</b>
+              &nbsp;&nbsp;
             </p>
           </div><!--/.nav-collapse -->
         </div>

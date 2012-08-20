@@ -90,8 +90,8 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li ng-repeat="profileid in getProfileGroups(d.user.profiles)">
-                <a ng-href="" ng-click="$parent.filterbyids=d.profileGroups[profileid].events; $parent.ownprofile=d.profileGroups[profileid].displayName[user.gender]; $parent.otherprofile=''">{{d.profileGroups[profileid].displayName[d.user.gender]}}
+              <li ng-repeat="profileid in getProfileGroups(d.user.profiles[d.snapshotId])">
+                <a ng-href="" ng-click="$parent.filterbyids=d.profileGroups[profileid].events; $parent.ownprofile=d.profileGroups[profileid].displayName[d.user.gender]; $parent.otherprofile='';">{{d.profileGroups[profileid].displayName[d.user.gender]}}
                   <span ng-show="d.user.organizations.length>1"> ({{d.organizations[d.profileGroups[profileid].organizationId].displayName}})</span>
                 </a>
               </li>
@@ -106,7 +106,7 @@
               <b class="caret"></b>
             </a>
             <ul class="dropdown-menu">
-              <li ng-repeat="profileid in getOtherProfileGroups(d.user.profiles)">
+              <li ng-repeat="profileid in getOtherProfileGroups(d.user.profiles[d.snapshotId])">
                 <a ng-href="" ng-click="$parent.filterbyids=d.profileGroups[profileid].events; $parent.otherprofile=d.profileGroups[profileid].displayName[2]; $parent.ownprofile=''">{{d.profileGroups[profileid].displayName[2]}}
                   <span ng-show="d.user.organizations.length>1"> ({{d.organizations[d.profileGroups[profileid].organizationId].displayName}})</span>
                 </a>

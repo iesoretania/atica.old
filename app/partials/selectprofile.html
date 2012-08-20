@@ -18,16 +18,41 @@
         Desde aquí podrá listar los perfiles disponibles para su usuario y seleccionar cuál será el perfil activo.
       </small>
     </div>
-    <form name="profileGroupsForm">
-      <div class="well well-small" ng-repeat="organizationId in d.user.organizations" ng-show="d.user.profiles[organizationId].length>0">
-        <p><b>{{d.organizations[organizationId].displayName}}</b></p>
-        <p ng-repeat="profileId in d.user.profiles[organizationId]">
-          <input type="radio" ng-model="d.user.currentProfileId" value="{{profileId}}" id="elem{{d.profiles[profileId]}}">&nbsp;<!--label for="elem{{profileid}}"-->{{d.profileGroups[d.profiles[profileId].groupId].displayName[d.user.gender]}}<!--/label-->
-          <span ng-show="d.profiles[profileId].displayName.length>0"> ({{d.profiles[profileId].displayName}})</span>
-          </input> 
-        </p>
+    <form name="profileGroupsForm" class="form-horizontal">
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label" for="snapshot">Curso académico</label>
+          <div class="controls">
+            
+            
+            <select id="snapshot" ng-model="d.snapshotId" ng-options="key as value.displayName for (key, value) in d.snapshots">
+              <!--option ng-repeat="snap in d.snapshots" value="{{snap.Id}}">
+                {{snap.DisplayName}}
+              </option-->
+            </select>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label" for="profiles">Perfil</label>
+          <div class="controls">
+            
+            
+              <label class="radio" ng-repeat="profId in d.user.profiles[d.snapshotId]">
+                <input type="radio" ng-model="d.profileId" value="{{profId}}" id="elem{{profId}}" />&nbsp;
+                  <span ng-class="{'profile-selected': profId==$parent.d.profileId}">{{d.profileGroups[d.profiles[profId].profileGroupId].displayName[d.user.gender]}}</span>
+                  <span ng-show="d.profiles[profId].displayName.length>0"> ({{d.profiles[profId].displayName}})</span>
+                  <span ng-show="d.profileGroups[d.profiles[profId].profileGroupId].description.length>0" class="profile-muted help-inline">{{d.profileGroups[d.profiles[profId].profileGroupId].description}}</span>
+              </label>
+              
+          </div>
+        </div>                    
+
+            
+      </fieldset>
+      <div class="form-actions">
+        <input class="btn btn-primary" type="button" value="Comenzar" ng-click="setLocation('#/home')"></input>
       </div>
-      <input class="btn btn-primary" type="button" value="Comenzar" ng-click="setLocation('#/home')"></input>
     </form>
     <hr />
     <footer>

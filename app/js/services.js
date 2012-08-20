@@ -5,43 +5,68 @@
 angular.module('aticaApp.services', ['ngResource'], function ($provide) {
   $provide.service('userDataService', ['$resource', '$timeout', function($resource, $timeout) {
     
-    var loginDataService = $resource('/~ixl03065/3to5/api/index.php/v1/logindata/:userName', {userName:'@username'});
-    var loginService = $resource('/~ixl03065/3to5/api/index.php/v1/login/:userName/:snapShot', {userName:'@username', snapShot:'@snapshot'});    
+    var token = "";
+    
+    var loginService = $resource('/~ixl03065/3to5/api/index.php/v1/auth');
+    
+    var organizationService = $resource('/~ixl03065/3to5/api/index.php/v1/organization/:organization', {
+      organization:'@Id'
+    });
+    
+    var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/');
     
     var _scope = {};
-
+    
+    _scope.profile = null;
+    _scope.groupings = {};
+    
+    var _getGrouping = function(groupId, fnOk, fnError) {
+      //console.log('Pidiendo grupo '+groupId);
+      var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId', {
+        'groupId':groupId
+      });
+      return groupingService.query(fnOk, fnError);
+    }
+    
+    var _setOrganization = function(org) {
+      
+      angular.forEach(_scope.organizations, function(value, key) {
+        if (value.id == org) {
+          _scope.organization = value;
+          //console.log("Organización cambiada a "+value.id+". Cargando secciones");
+          
+          _scope.groupings = groupingService.query({
+            'guest': value.id,
+            'folders': 1
+            }, function() {}, function() {});
+        }
+      });
+      
+    }
+    
     _scope.user = false;
-
-    _scope.organizations = {
-      1: {
-        displayName: 'I.E.S. Oretania'
-      },
-      2: {
-        displayName: 'I.E.S. Ntra. Sra. de la Cabeza'
+    
+    _scope.snapshot = undefined;
+    
+    _scope.snapshots = undefined;
+    
+    _scope.organization = undefined;
+    
+    _scope.organizations = organizationService.query(function(result) {
+      //console.log("organizations ok!");
+      //console.dir(_scope.organizations);
+      if (_scope.organizations.length>0 && angular.isDefined(_scope.organization)==false) {
+        _setOrganization(_scope.organizations[0].id);
       }
-    };
 
-    _scope.documents = {
-      8:  {
-        organizationId: 1, 
-        displayName: "Plan de centro"
-      },
-      34: {
-        organizationId: 1, 
-        displayName: "Criterios de correción"
-      },
-      91: {
-        organizationId: 1, 
-        displayName: "Banco de actividades"
-      }
-    };
-
-    _scope.guestdocuments = [8, 34, 91];
-		
+    });
+       
     return {
+      setOrganization: _setOrganization,
       getScope: function() {
         return _scope;
       },
+      getGrouping: _getGrouping,
       getUser: function() {
         return _scope.user;
       },
@@ -69,7 +94,126 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       getCurrentOrganization: function() {
         return _scope.profileGroups[_scope.user.currentProfileGroup].organization;
       },
-      actualLogin: function() {
+      login: function(user, pass, snap, okFn, errorFn) {
+        var action;
+        action = new loginService({
+          'username': jQuery.trim(user.toLowerCase()), 
+          'password': pass, 
+          'organization_id': _scope.organization.id
+        });
+        var self = this;
+        action.$save(function(result) {
+          // OK
+          //console.dir(result);
+          _scope.profileGroups = result.profileGroups;
+          _scope.profiles = result.profiles;
+          _scope.snapshots = result.snapshots;
+          _scope.user = result.userData;
+          _scope.snapshotId = result.snapshotId.toString();
+          //console.dir(_scope.user);
+          okFn();
+        },
+        function()
+        {
+          // Error
+          errorFn();
+        });
+      },
+      logout: function() {
+        _scope.user=false;
+        _scope.groupings = groupingService.query({
+          'guest': _scope.organization.id,
+          'folders': 1
+          }, function() {}, function() {});
+      }
+
+    };
+  }]);
+  $provide.service('timeAgoService', ['$timeout', function($timeout) {
+    var ref;
+    return {
+      nowTime: 0,
+      initted: false,
+      settings: {
+        refreshMillis: 60000,
+        allowFuture: false,
+        strings: {
+          prefixAgo: "hace",
+          prefixFromNow: "dentro de",
+          suffixAgo: "",
+          suffixFromNow: "",
+          seconds: "menos de un minuto",
+          minute: "un minuto",
+          minutes: "unos %d minutos",
+          hour: "una hora",
+          hours: "%d horas",
+          day: "un día",
+          days: "%d días",
+          month: "un mes",
+          months: "%d meses",
+          year: "un año",
+          years: "%d años",
+          wordSeparator: " ",
+          numbers: []
+        }
+      },
+      doTimeout: function() {
+        ref.nowTime = (new Date()).getTime();
+        $timeout(ref.doTimeout, ref.settings.refreshMillis);
+      },
+      init: function() {
+        if (this.initted == false) {
+          this.initted = true;
+          this.nowTime = (new Date()).getTime();
+          ref = this;
+          this.doTimeout();
+          this.initted = true;
+        }
+      },
+      inWords: function(distanceMillis) {
+        var $l = this.settings.strings;
+        var prefix = $l.prefixAgo;
+        var suffix = $l.suffixAgo;
+        if (this.settings.allowFuture) {
+          if (distanceMillis < 0) {
+            prefix = $l.prefixFromNow;
+            suffix = $l.suffixFromNow;
+          }
+        }
+
+        var seconds = Math.abs(distanceMillis) / 1000;
+        var minutes = seconds / 60;
+        var hours = minutes / 60;
+        var days = hours / 24;
+        var years = days / 365;
+
+        function substitute(stringOrFunction, number) {
+          var string = $.isFunction(stringOrFunction) ? stringOrFunction(number, distanceMillis) : stringOrFunction;
+          var value = ($l.numbers && $l.numbers[number]) || number;
+          return string.replace(/%d/i, value);
+        }
+
+        var words = seconds < 45 && substitute($l.seconds, Math.round(seconds)) ||
+        seconds < 90 && substitute($l.minute, 1) ||
+        minutes < 45 && substitute($l.minutes, Math.round(minutes)) ||
+        minutes < 90 && substitute($l.hour, 1) ||
+        hours < 24 && substitute($l.hours, Math.round(hours)) ||
+        hours < 42 && substitute($l.day, 1) ||
+        days < 30 && substitute($l.days, Math.round(days)) ||
+        days < 45 && substitute($l.month, 1) ||
+        days < 365 && substitute($l.months, Math.round(days / 30)) ||
+        years < 1.5 && substitute($l.year, 1) ||
+        substitute($l.years, Math.round(years));
+
+        var separator = $l.wordSeparator === undefined ?  " " : $l.wordSeparator;
+        return $.trim([prefix, words, suffix].join(separator));
+      }
+    }
+  }]);
+});	
+
+
+      /*actualLogin: function() {
 
         _scope.activities = {
           23: {
@@ -124,7 +268,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         
         _scope.users = {
           5: {
-             displayName: "Luis Ramón López López"
+            displayName: "Luis Ramón López López"
           }
         }
 
@@ -290,7 +434,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
             displayName: "Elaborar la propuesta de Oferta Educativa", 
             description: "Elaborar la propuesta de Oferta Educativa para el curso siguiente."
           }
-        };//*/
+        };
 
         _scope.user = {
           id: 5,
@@ -322,118 +466,33 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           isGlobalAdmin: false,
           lastLogin: 1342870961366
         };
-      },
-      login: function(user, pass, snap, okFn, errorFn) {
-        var action;
-        if (snap === undefined) {
-          action = new loginDataService({ 'username': user, 'password': pass});
-        }
-        else {
-          action = new loginService({ 'username': user, 'password': pass, 'snapshot': snap});
-        }
-        var self = this;
-        action.$save(function(result) {
-          // OK
-          if (snap === undefined) {
-          //self.actualLogin();
-            _scope.logindata = result;
-            _scope.logindata.org = 0;
-            _scope.logindata.snap = _scope.logindata.snapshots[0].Snapshots[0].Id;
-          }
-          else {
-            _scope.logindata = undefined;
-            self.actualLogin();
-          }
-          okFn();
-        },
-        function()
-        {
-          // Error
-          errorFn();
-        });
-      }
+      },*/
 
+ 
+    /*_scope.organizations = {
+      1: {
+        displayName: 'I.E.S. Oretania'
+      },
+      2: {
+        displayName: 'I.E.S. Ntra. Sra. de la Cabeza'
+      }
+    };*/
+
+    /*_scope.documents = {
+      8:  {
+        organizationId: 1, 
+        displayName: "Plan de centro"
+      },
+      34: {
+        organizationId: 1, 
+        displayName: "Criterios de correción"
+      },
+      91: {
+        organizationId: 1, 
+        displayName: "Banco de actividades"
+      }
     };
-  }]);
-  $provide.service('timeAgoService', ['$timeout', function($timeout) {
-    var ref;
-    return {
-      nowTime: 0,
-      initted: false,
-      settings: {
-        refreshMillis: 60000,
-        allowFuture: false,
-        strings: {
-          prefixAgo: "hace",
-          prefixFromNow: "dentro de",
-          suffixAgo: "",
-          suffixFromNow: "",
-          seconds: "menos de un minuto",
-          minute: "un minuto",
-          minutes: "unos %d minutos",
-          hour: "una hora",
-          hours: "%d horas",
-          day: "un día",
-          days: "%d días",
-          month: "un mes",
-          months: "%d meses",
-          year: "un año",
-          years: "%d años",
-          wordSeparator: " ",
-          numbers: []
-        }
-      },
-      doTimeout: function() {
-        ref.nowTime = (new Date()).getTime();
-        $timeout(ref.doTimeout, ref.settings.refreshMillis);
-      },
-      init: function() {
-        if (this.initted == false) {
-          this.initted = true;
-          this.nowTime = (new Date()).getTime();
-          ref = this;
-          this.doTimeout();
-          this.initted = true;
-        }
-      },
-      inWords: function(distanceMillis) {
-        var $l = this.settings.strings;
-        var prefix = $l.prefixAgo;
-        var suffix = $l.suffixAgo;
-        if (this.settings.allowFuture) {
-          if (distanceMillis < 0) {
-            prefix = $l.prefixFromNow;
-            suffix = $l.suffixFromNow;
-          }
-        }
+    
+    _scope.snapshots = {};
 
-        var seconds = Math.abs(distanceMillis) / 1000;
-        var minutes = seconds / 60;
-        var hours = minutes / 60;
-        var days = hours / 24;
-        var years = days / 365;
-
-        function substitute(stringOrFunction, number) {
-          var string = $.isFunction(stringOrFunction) ? stringOrFunction(number, distanceMillis) : stringOrFunction;
-          var value = ($l.numbers && $l.numbers[number]) || number;
-          return string.replace(/%d/i, value);
-        }
-
-        var words = seconds < 45 && substitute($l.seconds, Math.round(seconds)) ||
-        seconds < 90 && substitute($l.minute, 1) ||
-        minutes < 45 && substitute($l.minutes, Math.round(minutes)) ||
-        minutes < 90 && substitute($l.hour, 1) ||
-        hours < 24 && substitute($l.hours, Math.round(hours)) ||
-        hours < 42 && substitute($l.day, 1) ||
-        days < 30 && substitute($l.days, Math.round(days)) ||
-        days < 45 && substitute($l.month, 1) ||
-        days < 365 && substitute($l.months, Math.round(days / 30)) ||
-        years < 1.5 && substitute($l.year, 1) ||
-        substitute($l.years, Math.round(years));
-
-        var separator = $l.wordSeparator === undefined ?  " " : $l.wordSeparator;
-        return $.trim([prefix, words, suffix].join(separator));
-      }
-    }
-  }]);
-});	
+    _scope.guestdocuments = [8, 34, 91];*/
