@@ -1,5 +1,5 @@
 
-<ul class="nav nav-list" ng-show="d.user">
+<ul class="nav nav-list" ng-show="d.loaded">
   <li class="nav-header nav-header-small">
     General
   </li>
@@ -16,22 +16,22 @@
     <a ng-href="#/notifications"><i class="icon-envelope"></i>Notificaciones <span class="badge badge-info" ng-show="d.user.notifications.length>0">{{d.user.notifications.length}}</span></a>
   </li>
 </ul>
-<ul class="nav nav-list" animate-on-change="{{d.profileId}}">
-  <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities.length>0" >
-    Actividades {{d.profileGroups[d.profiles[d.user.currentProfileId].groupId].displayName[d.user.gender]}}
+<ul class="nav nav-list" ng-show="d.loaded && d.profileGroups[d.profiles[d.profileId].profileGroupId].activities.length>0" animate-on-change="{{d.profileId}}">
+  <li class="nav-header nav-header-small">
+    Actividades {{d.profileGroups[d.profiles[d.profileId].profileGroupId].displayName[d.user.gender]}}
   </li>
-  <li ng-repeat="activityId in d.profileGroups[d.profiles[d.user.currentProfileId].groupId].activities" ng-class="isActive($location,'/activity/'+activityId)">
+  <li ng-repeat="activityId in d.profileGroups[d.profiles[d.profileId].profileGroupId].activities" ng-class="isActive($location,'/activity/'+activityId)">
     <a ng-href="#/activity/{{activityId}}">{{d.activities[activityId].displayName}}</a>
   </li>
 </ul>
 <ul class="nav nav-list">  
-  <li class="nav-header nav-header-small" ng-show="d.groupings.length>0">
+  <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.profileId].profileGroupId].groupings.length>0">
     Secciones
   </li>
   <li ng-show="!d.groupings">
     Cargando...
   </li>
-  <li ng-repeat="grouping in d.groupings" ng-class="isActive($location,'/section/'+$index)" >
-    <a ng-href="#/section/{{$index}}">{{grouping.displayName}}</a>
+  <li ng-repeat="grouping in d.profileGroups[d.profiles[d.profileId].profileGroupId].groupings" ng-class="isActive($location,'/section/'+d.groupings[grouping].id)" >
+    <a ng-href="#/section/{{d.groupings[grouping].id}}">{{d.groupings[grouping].displayName}}</a>
   </li>
 </ul>

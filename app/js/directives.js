@@ -49,6 +49,8 @@ angular.module('aticaApp.directives', []).
     }
   }).
   directive('weekNames', function(){
+    
+          
     return {
       replace: true,
       priority: 0,
@@ -58,7 +60,8 @@ angular.module('aticaApp.directives', []).
       },
       link: {
         post: function(scope, linkElement, attrs) {
-          scope.$watch("weekStart*48+weekCount",function(value) {
+          var updateContent = function(value) {
+            if (value == undefined) return;
             var i;
             var last = parseInt(attrs.weekStart)+parseInt(attrs.weekCount);
             var months=["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -70,8 +73,45 @@ angular.module('aticaApp.directives', []).
               + months[(Math.floor(i/4)+12) % 12] + "<br />" + weeks[(i+48) % 4] + "</th>";
             }
             $(linkElement).html(result);
-          });
+          };
+          scope.$watch("weekStart", updateContent);
+          scope.$watch("weekCount", updateContent);
         }
       }
     }
-  });
+  }).directive('uiIf', [function () {
+  return {
+    transclude: 'element',
+    priority: 1000,
+    terminal: true,
+    restrict: 'A',
+    compile: function (element, attr, linker) {
+      return function (scope, iterStartElement, attr) {
+        iterStartElement[0].doNotMove = true;
+        var expression = attr.uiIf;
+        var lastElement;
+        var lastScope;
+        scope.$watch(expression, function (newValue) {
+          if (lastElement) {
+            lastElement.remove();
+            lastElement = null;
+          }
+          if (lastScope) {
+            lastScope.$destroy();
+            lastScope = null;
+          }
+          if (newValue) {
+            lastScope = scope.$new();
+            linker(lastScope, function (clone) {
+              lastElement = clone;
+              iterStartElement.after(clone);
+            });
+          }
+          // Note: need to be parent() as jquery cannot trigger events on comments
+          // (angular creates a comment node when using transclusion, as ng-repeat does).
+          iterStartElement.parent().trigger("$childrenChanged");
+        });
+      };
+    }
+  };
+}]);

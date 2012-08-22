@@ -4,34 +4,6 @@
   display: none;
 }
 
-.menu {
-  list-style: none;
-  border-bottom: 0.1em solid black;
-  margin-bottom: 2em;
-  padding: 0 0 0.5em;
-}
-
-.menu:before {
-  content: "[";
-}
-
-.menu:after {
-  content: "]";
-}
-
-.menu > li {
-  display: inline;
-}
-
-.menu > li:before {
-  content: "|";
-  padding-right: 0.3em;
-}
-
-.menu > li:nth-child(1):before {
-  content: "";
-  padding: 0;
-}
 body {
   padding-top: 60px;
   padding-bottom: 40px;
@@ -48,6 +20,13 @@ body {
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.81), 0 0 30px rgba(255, 255, 255, 0.8125);
 }
 
+.nav-list {
+  padding-top: 5px !important;
+}
+
+th.hidecell {
+  width: 0 !important;
+}
 th.monthstart {
   border-left: 1px solid;
 }

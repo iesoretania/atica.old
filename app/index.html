@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-responsive.css" />
   </head>
   <body ng-controller='MainViewCtrl'>
-    <div class="navbar navbar-fixed-top" ng-cloak>
+    <div class="navbar navbar-fixed-top navbar-inverse" ng-cloak>
       <div class="navbar-inner">
         <div class="container">
           <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
@@ -77,9 +77,9 @@
           <div class="nav-collapse">
             <ul class="nav">
               <li ng-class="isActive($location,'/home')"><a href="#">Inicio</a></li>
-              <li ng-class="isActive($location,'/browser')"><a href="#/browser">Documentos</a></li>
+              <li ng-class="isActive($location,'/browser')" ng-show="d.loaded"><a href="#/browser">Documentos</a></li>
               <!-- Profile dropdown -->
-              <li class="dropdown" ng-show="d.user.userName">
+              <li class="dropdown" ng-show="d.loaded">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   Perfiles
                   <b class="caret"></b>
@@ -97,7 +97,7 @@
               <!--li class="divider-vertical"></li-->
             </ul>
 
-            <form class="navbar-search pull-left" ng-show="d.user.userName">
+            <form class="navbar-search pull-left" ng-show="d.loaded">
               <input type="text" class="search-query span2" placeholder="Buscar...">
             </form>
 
@@ -120,7 +120,7 @@
     </div>
     <script src="lib/jquery/jquery-1.7.2.min.js"></script>
     <script src="lib/underscore/underscore-min.js"></script>
-    <script src="lib/angular/angular.js"></script>
+    <script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular/angular-resource.js"></script>
     <script src="lib/angular/i18n/angular-locale_es-es.js"></script>
     <!--script src="lib/angular/i18n/angular-locale-es.js"></script -->

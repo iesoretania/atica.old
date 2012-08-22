@@ -5,7 +5,7 @@
 angular.module('aticaApp.services', ['ngResource'], function ($provide) {
   $provide.service('userDataService', ['$resource', '$timeout', function($resource, $timeout) {
     
-    var token = "";
+    var accessToken = "";
     
     var loginService = $resource('/~ixl03065/3to5/api/index.php/v1/auth');
     
@@ -13,7 +13,11 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       organization:'@Id'
     });
     
-    var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/');
+    var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId');
+    
+    var snapshotDataService = $resource('/~ixl03065/3to5/api/index.php/v1/snapshotdata/:snapshotId');
+    
+    var folderService = $resource('/~ixl03065/3to5/api/index.php/v1/folder/:folderId');
     
     var _scope = {};
     
@@ -22,10 +26,10 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
     
     var _getGrouping = function(groupId, fnOk, fnError) {
       //console.log('Pidiendo grupo '+groupId);
-      var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId', {
+      /*var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId', {
         'groupId':groupId
-      });
-      return groupingService.query(fnOk, fnError);
+      });*/
+      return groupingService.query({},fnOk, fnError);
     }
     
     var _setOrganization = function(org) {
@@ -35,10 +39,22 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           _scope.organization = value;
           //console.log("Organización cambiada a "+value.id+". Cargando secciones");
           
-          _scope.groupings = groupingService.query({
+          groupingService.get({
             'guest': value.id,
             'folders': 1
-            }, function() {}, function() {});
+          }, function(e) {
+            //_scope.guestgroupings = e.groupings;
+            //_scope.guestfolders = e.folders;
+            _scope.profileId = null;
+            _scope.profiles = {};
+            _scope.profiles[null] = {};
+            _scope.profiles[null].profileGroupId = null;
+            _scope.profileGroups = {};
+            _scope.profileGroups[null] = {};
+            _scope.profileGroups[null].groupings = e.groupingsOrder;
+            _scope.groupings = e.groupings;
+            _scope.folders = e.folders;
+          }, function() {});
         }
       });
       
@@ -110,6 +126,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           _scope.snapshots = result.snapshots;
           _scope.user = result.userData;
           _scope.snapshotId = result.snapshotId.toString();
+          accessToken = result.accessToken;
           //console.dir(_scope.user);
           okFn();
         },
@@ -121,12 +138,56 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       },
       logout: function() {
         _scope.user=false;
+        _scope.loaded = false;
         _scope.groupings = groupingService.query({
           'guest': _scope.organization.id,
           'folders': 1
-          }, function() {}, function() {});
+        }, function() {}, function() {});
+      },
+      loaddata: function(snapshot, fnOk, fnError) {
+        if (snapshot != _scope.loadedSnapshotId) {
+          snapshotDataService.get({
+            'snapshotId': snapshot, 
+            'token': accessToken
+          }, function(e) {
+            _scope.profiles = e.profiles;
+            _scope.profileGroups = e.profileGroups;
+            _scope.events = e.events;
+            _scope.activities = e.activities;
+            _scope.groupings = e.groupings;
+            _scope.loaded = true;
+            _scope.loadedSnapshotId = snapshot;
+            _scope.persons = e.persons;
+            fnOk(e);
+          }, function() {
+            _scope.loaded = false;
+            fnError();
+          });
+        }
+        else {
+          fnOk();
+        }
+      },
+      getfolder: function(folderId, guest, fnOk, fnError) {
+        var params = {
+          'folderId': folderId
+        };
+        if (guest == false) {
+          params.token = accessToken 
+        }
+        else {
+          params.guest = true;
+        }
+        folderService.get(
+          params
+          , function(e) {
+            fnOk(e);
+          }, function() {
+            fnError();
+          });
       }
-
+        
+      
     };
   }]);
   $provide.service('timeAgoService', ['$timeout', function($timeout) {
@@ -213,7 +274,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
 });	
 
 
-      /*actualLogin: function() {
+/*actualLogin: function() {
 
         _scope.activities = {
           23: {
@@ -469,7 +530,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       },*/
 
  
-    /*_scope.organizations = {
+/*_scope.organizations = {
       1: {
         displayName: 'I.E.S. Oretania'
       },
@@ -478,7 +539,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       }
     };*/
 
-    /*_scope.documents = {
+/*_scope.documents = {
       8:  {
         organizationId: 1, 
         displayName: "Plan de centro"

@@ -20,7 +20,7 @@
     </div>
     <form name="profileGroupsForm" class="form-horizontal">
       <fieldset>
-        <div class="control-group">
+        <div class="control-group" ng-hide="d.loaded">
           <label class="control-label" for="snapshot">Curso académico</label>
           <div class="controls">
             
@@ -46,17 +46,16 @@
               </label>
               
           </div>
-        </div>                    
-
+        </div>
             
       </fieldset>
       <div class="form-actions">
-        <input class="btn btn-primary" type="button" value="Comenzar" ng-click="setLocation('#/home')"></input>
+        <input class="btn btn-primary" type="submit" value="Comenzar" ng-click="downloadData()"></input>
       </div>
     </form>
     <hr />
     <footer>
-      <p>&copy; Luis Ramón López López, 2009-2012</p>
+      <p>&copy; Grupo de trabajo ÁTICA, 2009-2012</p>
     </footer>
   </div>
 </div>

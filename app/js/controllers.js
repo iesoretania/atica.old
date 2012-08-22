@@ -94,7 +94,7 @@ function LoginFormViewCtrl($scope, $location, user) {
   });/*/
 
   $('.dropdown-menu input').click(function(e) {
-    e.stopPropagation();
+    //e.stopPropagation();
   });
 
   $('input.loginbutton').click(function () {
@@ -269,12 +269,12 @@ HomeViewCtrl.$inject = ['$scope', '$routeParams', 'userDataService'];
 function NewsViewCtrl($scope) {
 }
 
-function ProfileViewCtrl($scope, $location) {
+function ProfileViewCtrl($scope, $location, user) {
   if (!$scope.d.user) {
     $location.path("/home");
     //console.dir($scope);
   }
-  $scope.d = $scope.$parent.d;
+  //$scope.d = $scope.$parent.d;
   
   $scope.$watch("d.snapshotId", function(value) {
     //console.log("Cambio de snapshot a "+value);
@@ -284,8 +284,18 @@ function ProfileViewCtrl($scope, $location) {
     //console.log("Nuevo perfil es "+$scope.d.profileId);
     
   });
+  
+  $scope.downloadData = function() {
+    
+      user.loaddata($scope.d.snapshotId, function() {
+        $location.path('/home');
+      }, function() {
+        $location.path('/error')
+      });
+    
+  }
 }
-ProfileViewCtrl.$inject = ['$scope', '$location'];
+ProfileViewCtrl.$inject = ['$scope', '$location', 'userDataService'];
 
 function ActivityViewCtrl($scope, $location) {
   /*if (!$scope.d.user) {
@@ -315,3 +325,17 @@ SectionViewCtrl.$inject = ['$scope', '$location', '$routeParams', 'userDataServi
 function ErrorViewCtrl($scope) {
 }
 ErrorViewCtrl.$inject = ['$scope'];
+
+function FolderViewCtrl($scope, user) {
+  //console.dir($scope);
+  $scope.loading = true;
+  user.getfolder($scope.$parent.folderId, ($scope.d.loaded!=true), function(e) {
+    $scope.loading = false;
+    $scope.deliveries = e.deliveries;
+    $scope.deliveriesOrder = e.deliveriesOrder;
+  }, function () {
+    $scope.error = true;
+    $scope.loading = false;
+  });
+}
+FolderViewCtrl.$inject = ['$scope', 'userDataService'];

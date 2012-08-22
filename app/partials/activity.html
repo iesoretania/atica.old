@@ -19,13 +19,8 @@
         {{d.activities[$routeParams.activityId].description}}
       </small>
     </div>
-    <div class="framed" ng-repeat="folderId in d.activities[$routeParams.activityId].folders">
-      <!--p class="pull-right"><a class="btn btn-inverse" href="#">Descartar</a><a class="btn btn-success" href="#">Comentar</a></p>
-      <div class="span4">
-        <h2>{{piece.subject}}</h2>
-        <p>{{piece.body}}</p>
-        <p><a class="btn btn-inverse" href="#">Descartar</a>&nbsp;<a class="btn btn-success" href="#">Comentar</a></p>
-      </div -->
+    <div class="framed" ng-repeat="folder in d.groupings[$routeParams.section_id].folders" ng-controller="FolderViewCtrl">
+      
       <h2>{{d.folders[folderId].displayName}}</h2>
       <form>
         <div class="pull-right">
@@ -37,7 +32,10 @@
       </form>
       <p>{{d.folders[folderId].description}}</p>
 
-      <table class="table table-striped table-hover table-condensed" ng-show="d.deliveries[folderId]">
+      <h3 ng-show="loading">Cargando...</h3>
+      <h3 ng-show="error">No se pueden visualizar los contenidos</h3>
+      
+      <table class="table table-striped table-hover table-condensed" ng-show="deliveries">
         <thead>
           <tr>
             <th>Documento</th>
@@ -48,20 +46,21 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="delivery in d.deliveries[folderId]">
-            <td>{{delivery.displayName}}</td>
-            <td time-ago from-time="{{delivery.creationDate}}" title="{{$parent.delivery.creationDate | date:'medium'}}"></td>
+          <tr ng-repeat="deliveryId in deliveriesOrder">
+            <td>{{deliveries[deliveryId].displayName}}</td>
+            <td time-ago from-time="{{deliveries[deliveryId].creationDate}}" title="{{$parent.deliveries[deliveryId].creationDate | date:'medium'}}"></td>
             <td></td>
-            <td>{{d.users[delivery.uploaderPersonId].displayName}}</td>
+            <td>{{d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].displayName}}!!{{deliveries[deliveryId].currentRevisionId}}</td>
             <td><i class="icon-pencil"></i> <i class="icon-trash"></i></td>
           </tr>
         </tbody>
       </table>
       <hr />
     </div>
+    
     <hr />
     <footer>
-      <p>&copy; Luis Ramón López López, 2009-2012</p>
+      <p>&copy; Grupo de trabajo ÁTICA, 2009-2012</p>
     </footer>
   </div>
 </div>
