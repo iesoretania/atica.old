@@ -139,10 +139,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       logout: function() {
         _scope.user=false;
         _scope.loaded = false;
-        _scope.groupings = groupingService.query({
-          'guest': _scope.organization.id,
-          'folders': 1
-        }, function() {}, function() {});
+        _setOrganization(_scope.organization.id);
       },
       loaddata: function(snapshot, fnOk, fnError) {
         if (snapshot != _scope.loadedSnapshotId) {
@@ -158,6 +155,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
             _scope.loaded = true;
             _scope.loadedSnapshotId = snapshot;
             _scope.persons = e.persons;
+            _scope.folders = e.folders;
             fnOk(e);
           }, function() {
             _scope.loaded = false;
@@ -185,8 +183,19 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           }, function() {
             fnError();
           });
-      }
+      },
+      getdownloaddeliveryurl: function (id) {
+        var r = "/~ixl03065/3to5/download.php?id="+id+"&";
         
+        if (_scope.loaded) {
+          r = r + "token=" + encodeURI(accessToken);
+        }
+        else {
+          r = r + "guest=1";
+        }
+        
+        return r;
+      }
       
     };
   }]);

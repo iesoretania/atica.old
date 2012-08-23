@@ -66,7 +66,7 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
   $scope.logout = function() {
     user.logout();
   }
-//$('.dont-click').click(function(e) { e.stopPropagation(); });
+  //$('.dont-click').click(function(e) { e.stopPropagation(); });
 }
 
 MainViewCtrl.$inject = ['$rootScope', '$route', '$routeParams', '$location', 'userDataService'];
@@ -134,8 +134,8 @@ function CalendarViewCtrl($scope, $location) {
     var result = "";
     for (i=from;i<from+duration;i++) {
       result += "<th class=\"" + (((i%4)==0) ? "monthstart " : "")
-      + (((Math.floor(i/4)%2)==0) ? "evenmonth" : "oddmonth")+ "\">"
-      + months[Math.floor(i/4) % 12] + "<br />" + weeks[i % 4] + "</th>";
+        + (((Math.floor(i/4)%2)==0) ? "evenmonth" : "oddmonth")+ "\">"
+        + months[Math.floor(i/4) % 12] + "<br />" + weeks[i % 4] + "</th>";
     }
     return result;
   };
@@ -192,8 +192,8 @@ function CalendarViewCtrl($scope, $location) {
 
   $scope.getEventWeeks = function(event) {
     return event.duration + Math.min(0,$scope.getEventSkippedWeeks(event))+
-    Math.min(0,$scope.normalizeWeek($scope.calViewStart)+$scope.calViewDuration-$scope.normalizeWeek(event.start)-event.duration);
-  //return $scope.calViewDuration - Math.min($scope.getEventSkippedWeeks(event),0) - $scope.getEventFilledWeeks(event);
+      Math.min(0,$scope.normalizeWeek($scope.calViewStart)+$scope.calViewDuration-$scope.normalizeWeek(event.start)-event.duration);
+    //return $scope.calViewDuration - Math.min($scope.getEventSkippedWeeks(event),0) - $scope.getEventFilledWeeks(event);
   }
 
   $scope.getEventFilledWeeks = function(event) {
@@ -254,7 +254,7 @@ CalendarItemViewCtrl.$inject = ['$scope', "$location"];
 
 
 function HomeViewCtrl($scope, $routeParams, user) {
-//$('.dropdown-menu input').click(function(e) { e.stopPropagation(); });
+  //$('.dropdown-menu input').click(function(e) { e.stopPropagation(); });
   if (angular.isDefined($routeParams.organization_id) && angular.isDefined($scope.d.organization) && ($routeParams.organization_id != $scope.d.organization)) {
     //console.log("!!Cambiando organización!!");
     //console.dir($scope.d.organization);
@@ -287,11 +287,11 @@ function ProfileViewCtrl($scope, $location, user) {
   
   $scope.downloadData = function() {
     
-      user.loaddata($scope.d.snapshotId, function() {
-        $location.path('/home');
-      }, function() {
-        $location.path('/error')
-      });
+    user.loaddata($scope.d.snapshotId, function() {
+      $location.path('/home');
+    }, function() {
+      $location.path('/error')
+    });
     
   }
 }
@@ -327,12 +327,125 @@ function ErrorViewCtrl($scope) {
 ErrorViewCtrl.$inject = ['$scope'];
 
 function FolderViewCtrl($scope, user) {
-  //console.dir($scope);
+  
+  $scope.filterSender = function(d) {
+    if (d === undefined) return d;
+    
+    var r = _.filter(d, function(elem) {
+      return true;
+    });
+    
+    //$scope.count = r.length;
+    
+    return r;
+  }
+  
+  $scope.filterProfileGroup = function(d) {
+    if (d === undefined) return d;
+    
+    var r = _.filter(d, function(elem) {
+      return true;
+    });
+    
+    //$scope.count = r.length;
+    //console.dir(d);
+    return r;
+  }
+  
+  $scope.getDownloadLink = function(id) {
+    return user.getdownloaddeliveryurl(id);
+  }
+  
+  $scope.group = function(p) {
+    if ($scope.deliveriesOrder == undefined) return p;
+    var folder = $scope.d.folders[$scope.$parent.folderId];
+    //console.log($scope.$parent.folderId);
+    if (($scope.d.loaded != true) || (folder.isDivided == false)) {
+      return [null];
+    }
+    if ($scope.profileFilter == null) {
+      return p;
+    }
+    if ($scope.profileFilter == -1) {
+      return _.intersection(p, $scope.d.user.profiles);
+    }
+    return [$scope.profileFilter];
+  }
+  
+  $scope.filterDelivery = function(p) {
+    if (p === undefined) return p;
+    
+    if ($scope.uploadFilter == null) {
+      $scope.$parent.deliveriesCount = p.length;
+      return p;
+    }
+    var out = [];
+    angular.forEach(p, function(e) {
+      if ($scope.deliveries[e].revisions[$scope.deliveries[e].currentRevisionId].uploaderPersonId == $scope.uploadFilter) {
+        out.push(e);
+      }
+    });
+    $scope.$parent.deliveriesCount = out.length;
+    
+    return out;
+  }
+  
+  $scope.toUpperCase = function(str) {
+    return str.toUpperCase();
+  }
+  
+  $scope.getUploader = function(deliveryId) {
+    return $scope.deliveries[deliveryId].revisions[$scope.deliveries[deliveryId].currentRevisionId].uploaderPersonId;
+  }
+  
+  $scope.showName = function(key) {
+    if (key == null) return "Todos los documentos";
+    if (key == $scope.d.user.id) return "Sólo los míos";
+    return $scope.d.persons[key].displayName;
+  }
+  
+  $scope.showProfile = function(key) {
+    if (key === null) return "Todos los perfiles";
+    if (key === -1) return "Mis perfiles";
+    return $scope.d.profileGroups[$scope.d.profiles[key].profileGroupId].displayName[2]+" "+$scope.d.profiles[key].displayName;
+  }
+  
   $scope.loading = true;
+  
+  $scope.uploadFilter = null;
+  $scope.profileFilter = null;
+    
   user.getfolder($scope.$parent.folderId, ($scope.d.loaded!=true), function(e) {
     $scope.loading = false;
     $scope.deliveries = e.deliveries;
     $scope.deliveriesOrder = e.deliveriesOrder;
+    $scope.deliveriesOrder[null] = _.flatten($scope.deliveriesOrder);
+    $scope.profilesOrder = e.profilesOrder;
+    
+    if ($scope.d.loaded) {
+      $scope.uploaders = [];
+    
+      angular.forEach($scope.deliveriesOrder[null], function(e) {
+        var value = $scope.getUploader(e);
+        if (_.indexOf($scope.uploaders, value) == -1) {
+          $scope.uploaders.push(value);
+        }
+      });
+      //console.log("Sin ordenar");
+      //console.dir($scope.uploaders);
+      $scope.uploaders = _.sortBy($scope.uploaders, function (e) {
+        
+        if (e == $scope.d.user.id) return "";
+        
+        return $scope.d.persons[e].displayName;
+      });
+      //console.log("Ordenada");
+      $scope.uploaders.unshift(null);
+      //console.dir($scope.uploaders);
+      $scope.profilesFilterOrder = _.clone($scope.profilesOrder);
+      $scope.profilesFilterOrder.unshift(-1);
+      $scope.profilesFilterOrder.unshift(null);
+    }
   }, function () {
     $scope.error = true;
     $scope.loading = false;

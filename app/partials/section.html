@@ -26,19 +26,17 @@
 
       <h2>{{d.folders[folderId].displayName}}</h2>
 
-      <h3 ui-if="loading">Cargando...</h3>
-      <img ui-if="loading" src="img/loading.gif"/>
-      <h3 ui-if="error">No se pueden visualizar los contenidos</h3>
-
       <form ui-if="d.loaded">
         <div class="pull-right">
-          <select>
-            <option>Todos los documentos</option>
-            <option>Solo los míos</option>
-          </select>
+          <select ng-model="$parent.uploadFilter" ng-options="showName(key) for key in uploaders"></select><br/>
+          <select ng-show="d.folders[folderId].isDivided" ng-model="$parent.profileFilter" ng-options="showProfile(key) for key in profilesFilterOrder"></select><br />
         </div>
       </form>
-      <p>{{d.folders[folderId].description}}</p>
+      <p ng-bind-html="d.folders[folderId].description"></p>
+
+      <h3 ui-if="loading">Cargando...</h3>
+      <img ui-if="loading" src="img/loading.gif"/>
+      <h3 ui-if="error">Se ha producido un problema intentando visualizar el contenido</h3>
 
       <table class="table table-striped table-hover table-condensed" ng-show="deliveries">
         <thead>
@@ -50,14 +48,14 @@
             <th></th>
           </tr>
         </thead>
-        <tbody>
-          <tr ng-repeat="deliveryId in deliveriesOrder">
-            <td>{{deliveries[deliveryId].displayName}}</td>
-            <td time-ago from-time="{{deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploadDate}}" title="{{$parent.deliveries[deliveryId].creationDate | date:'medium'}}"></td>
+        <tbody ng-repeat="profileId in group(profilesOrder)">
+          <tr ng-show="deliveriesCount>0" ui-if="profileId != null" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[2])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
+          <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId])">
+            <td><a href="{{getDownloadLink(deliveryId)}}" href="">{{deliveries[deliveryId].displayName}}</a></td>
+            <td><abbr time-ago from-time="{{deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
             <td></td>
             <td ui-if="d.loaded">{{d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].displayName}}
-              <br/>
-              {{d.profileGroups[d.profiles[deliveries[deliveryId].profileId].profileGroupId].displayName[d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].gender]}} {{d.profiles[deliveries[deliveryId].profileId].displayName}}
+            <!--{{d.profileGroups[d.profiles[deliveries[deliveryId].profileId].profileGroupId].displayName[d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].gender]}} {{d.profiles[deliveries[deliveryId].profileId].displayName}}-->
             </td>
             <td><i class="icon-pencil"></i> <i class="icon-trash"></i></td>
           </tr>

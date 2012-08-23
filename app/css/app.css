@@ -24,9 +24,17 @@ body {
   padding-top: 5px !important;
 }
 
-th.hidecell {
-  width: 0 !important;
+tr.folder-profilegroup {
+  font-weight: bold;
+  background-color: #ddd;
+  font-variant: small-caps;
+  font-size:80%;
 }
+
+tr.folder-profilegroup td {
+  line-height: 10px;
+}
+
 th.monthstart {
   border-left: 1px solid;
 }

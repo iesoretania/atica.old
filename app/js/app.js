@@ -2,7 +2,7 @@
 
 
 // Declare app level module which depends on filters, and services
-angular.module('aticaApp', ['aticaApp.filters', 'aticaApp.services', 'aticaApp.directives']).
+angular.module('aticaApp', ['ngSanitize', 'aticaApp.filters', 'aticaApp.services', 'aticaApp.directives']).
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: HomeViewCtrl});
     $routeProvider.when('/home/:organization_id', {templateUrl: 'partials/home.html', controller: HomeViewCtrl});
