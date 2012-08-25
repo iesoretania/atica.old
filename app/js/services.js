@@ -126,6 +126,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           _scope.snapshots = result.snapshots;
           _scope.user = result.userData;
           _scope.snapshotId = result.snapshotId.toString();
+          _scope.isAdmin = result.userData.isGlobalAdministrator || result.isLocalAdministrator;
           accessToken = result.accessToken;
           //console.dir(_scope.user);
           okFn();
@@ -137,8 +138,16 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         });
       },
       logout: function() {
-        _scope.user=false;
         _scope.loaded = false;
+        delete _scope.user;
+        delete _scope.profileId;
+        delete _scope.profileGroups;
+        delete _scope.profiles;
+        delete _scope.folders;
+        delete _scope.groupings;
+        delete _scope.events;
+        
+        //_scope.user=false;
         _setOrganization(_scope.organization.id);
       },
       loaddata: function(snapshot, fnOk, fnError) {
@@ -184,14 +193,14 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
             fnError();
           });
       },
-      getdownloaddeliveryurl: function (id) {
-        var r = "/~ixl03065/3to5/download.php?id="+id+"&";
+      getdownloaddeliveryurl: function (id, id2) {
+        var r = "/~ixl03065/3to5/download.php?id="+encodeURI(id)+"&";
         
         if (_scope.loaded) {
           r = r + "token=" + encodeURI(accessToken);
         }
         else {
-          r = r + "guest=1";
+          r = r + "guest=" + encodeURI(id2);
         }
         
         return r;

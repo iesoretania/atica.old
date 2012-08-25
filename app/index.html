@@ -64,7 +64,7 @@
 
                   <b class="loginfield">Contraseña:</b><span class="loginform-error" ng-show="loginform.password.$error.minlength"> ¡Demasiado corta!</span><br/>
                   <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" size="30" ng-model="frm.password" placeholder="Si la ha olvidado, avise al coordinador"/>
-                  
+
                   <span class="loginform-error" ng-show="frm.error"><b>{{frm.error}}</b><br/></span>
                   <input class="btn btn-primary loginbutton" type="submit" name="commit" ng-disabled="loginform.$invalid" value="Entrar" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />
                   <!--<input class="btn btn-primary loginbutton" type="submit" name="commit" value="Entrar" ng-show="d.logindata" ng-click="login(frm.username,frm.password,d.logindata.snap)" autocomplete="off" data-loading-text="Conectando..." />
@@ -120,16 +120,19 @@
     </div>
     <script src="lib/jquery/jquery-1.7.2.min.js"></script>
     <script src="lib/underscore/underscore-min.js"></script>
+    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+    <script src="lib/bootstrap/js/bootstrap-modal.js"></script>
     <script src="lib/angular/angular.min.js"></script>
     <script src="lib/angular/angular-resource.min.js"></script>
     <script src="lib/angular/angular-sanitize.min.js"></script>
     <script src="lib/angular/i18n/angular-locale_es-es.js"></script>
     <!--script src="lib/angular/i18n/angular-locale-es.js"></script -->
-    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+
     <script src="js/app.js"></script>
     <script src="js/services.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/filters.js"></script>
     <script src="js/directives.js"></script>
+    <script src="js/popup.js"></script>
   </body>
 </html>

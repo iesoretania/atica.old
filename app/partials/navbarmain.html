@@ -16,7 +16,7 @@
     <a ng-href="#/notifications"><i class="icon-envelope"></i>Notificaciones <span class="badge badge-info" ng-show="d.user.notifications.length>0">{{d.user.notifications.length}}</span></a>
   </li>
 </ul>
-<ul class="nav nav-list" ng-show="d.loaded && d.profileGroups[d.profiles[d.profileId].profileGroupId].activities.length>0" animate-on-change="{{d.profileId}}">
+<ul class="nav nav-list" ui-if="d.loaded && d.profileGroups[d.profiles[d.profileId].profileGroupId].activities.length>0" animate-on-change="{{d.profileId}}">
   <li class="nav-header nav-header-small">
     Actividades {{d.profileGroups[d.profiles[d.profileId].profileGroupId].displayName[d.user.gender]}}
   </li>
@@ -25,7 +25,7 @@
   </li>
 </ul>
 <ul class="nav nav-list">  
-  <li class="nav-header nav-header-small" ng-show="d.profileGroups[d.profiles[d.profileId].profileGroupId].groupings.length>0">
+  <li class="nav-header nav-header-small" ui-if="d.profileGroups[d.profiles[d.profileId].profileGroupId].groupings.length>0">
     Secciones
   </li>
   <li ng-show="!d.groupings">

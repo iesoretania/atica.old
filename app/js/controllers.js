@@ -4,15 +4,7 @@
 
 function MainViewCtrl($scope, $route, $routeParams, $location, user) {
 
-  //user.setOrganization(1);
   $scope.d = user.getScope();
-  /*$scope.user = user.getUser();
-  $scope.activities = user.getActivities();
-  $scope.events = user.getEvents();
-  $scope.documents = user.getDocuments();
-  $scope.profiles = user.getProfiles();
-  $scope.profileGroups = user.getProfileGroups();
-  $scope.organizations = user.getOrganizations();*/
   $scope.calFirstWeek = 34; // Second week (2) of september (32)
 
   $scope.normalizeWeek = function (week) {
@@ -44,7 +36,6 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
     var matchlength = partialpath.length;
     var matched = mylocation.path().substring(0,matchlength)==partialpath;
 
-    //console.log("$"+mylocation.path().substring(0,matchlength)+"$=$"+partialpath+"$");
     // Check for trailing slash, which means partial match
     if (matched && (mylocation.path().length>matchlength)) {
       matched = mylocation.path()[matchlength]=='/';
@@ -66,7 +57,7 @@ function MainViewCtrl($scope, $route, $routeParams, $location, user) {
   $scope.logout = function() {
     user.logout();
   }
-  //$('.dont-click').click(function(e) { e.stopPropagation(); });
+
 }
 
 MainViewCtrl.$inject = ['$rootScope', '$route', '$routeParams', '$location', 'userDataService'];
@@ -87,16 +78,6 @@ function LoginFormViewCtrl($scope, $location, user) {
     });
   }
 
-  /*$scope.$watch('d.user.userName', function(v) {
-    //if (v != undefined) {
-    $scope.setLocation('#/selectprofile');
-  //}
-  });/*/
-
-  $('.dropdown-menu input').click(function(e) {
-    //e.stopPropagation();
-  });
-
   $('input.loginbutton').click(function () {
     $(this).button('loading');
   });  
@@ -105,9 +86,6 @@ function LoginFormViewCtrl($scope, $location, user) {
 LoginFormViewCtrl.$inject = ['$scope', '$location', 'userDataService'];
 
 function CalendarViewCtrl($scope, $location) {
-  /*if (!$scope.d.user) {
-    $location.path("/home");
-  };*/
 
   $("div.popover").remove();
 	
@@ -134,8 +112,8 @@ function CalendarViewCtrl($scope, $location) {
     var result = "";
     for (i=from;i<from+duration;i++) {
       result += "<th class=\"" + (((i%4)==0) ? "monthstart " : "")
-        + (((Math.floor(i/4)%2)==0) ? "evenmonth" : "oddmonth")+ "\">"
-        + months[Math.floor(i/4) % 12] + "<br />" + weeks[i % 4] + "</th>";
+      + (((Math.floor(i/4)%2)==0) ? "evenmonth" : "oddmonth")+ "\">"
+      + months[Math.floor(i/4) % 12] + "<br />" + weeks[i % 4] + "</th>";
     }
     return result;
   };
@@ -192,8 +170,8 @@ function CalendarViewCtrl($scope, $location) {
 
   $scope.getEventWeeks = function(event) {
     return event.duration + Math.min(0,$scope.getEventSkippedWeeks(event))+
-      Math.min(0,$scope.normalizeWeek($scope.calViewStart)+$scope.calViewDuration-$scope.normalizeWeek(event.start)-event.duration);
-    //return $scope.calViewDuration - Math.min($scope.getEventSkippedWeeks(event),0) - $scope.getEventFilledWeeks(event);
+    Math.min(0,$scope.normalizeWeek($scope.calViewStart)+$scope.calViewDuration-$scope.normalizeWeek(event.start)-event.duration);
+  //return $scope.calViewDuration - Math.min($scope.getEventSkippedWeeks(event),0) - $scope.getEventFilledWeeks(event);
   }
 
   $scope.getEventFilledWeeks = function(event) {
@@ -254,13 +232,8 @@ CalendarItemViewCtrl.$inject = ['$scope', "$location"];
 
 
 function HomeViewCtrl($scope, $routeParams, user) {
-  //$('.dropdown-menu input').click(function(e) { e.stopPropagation(); });
   if (angular.isDefined($routeParams.organization_id) && angular.isDefined($scope.d.organization) && ($routeParams.organization_id != $scope.d.organization)) {
-    //console.log("!!Cambiando organización!!");
-    //console.dir($scope.d.organization);
     user.setOrganization($routeParams.organization_id);
-    //console.dir($scope.d.organization);
-    //console.log("!!Fin de cambio de organización!!");   
   }
 }
 
@@ -272,24 +245,24 @@ function NewsViewCtrl($scope) {
 function ProfileViewCtrl($scope, $location, user) {
   if (!$scope.d.user) {
     $location.path("/home");
-    //console.dir($scope);
   }
-  //$scope.d = $scope.$parent.d;
-  
-  $scope.$watch("d.snapshotId", function(value) {
-    //console.log("Cambio de snapshot a "+value);
-    if (value!=undefined) {
-      $scope.d.profileId = $scope.d.user.profiles[value][0];
-    }
-    //console.log("Nuevo perfil es "+$scope.d.profileId);
-    
+  $('#start').on('click', function () {
+    $(this).button('loading');
   });
   
-  $scope.downloadData = function() {
+  $scope.$watch("d.snapshotId", function(value) {
+    if (value !== undefined) {
+      $scope.d.profileId = $scope.d.user.profiles[value][0];
+    }
+  });
+  
+  $scope.downloadData = function(e) {
     
     user.loaddata($scope.d.snapshotId, function() {
+      $(e).button('reset');
       $location.path('/home');
     }, function() {
+      $(e).button('reset');
       $location.path('/error')
     });
     
@@ -298,26 +271,17 @@ function ProfileViewCtrl($scope, $location, user) {
 ProfileViewCtrl.$inject = ['$scope', '$location', 'userDataService'];
 
 function ActivityViewCtrl($scope, $location) {
-  /*if (!$scope.d.user) {
+  if (!$scope.d.user) {
     $location.path("/home");
-  }*/
+  }
 }
 ActivityViewCtrl.$inject = ['$scope', '$location'];
 
 
 function SectionViewCtrl($scope, $location, $routeParams, user) {
-  /*console.dir($scope.$routeParams);
-  $scope.grouping = user.getGrouping($scope.$routeParams.section_id, function() {
-    console.log("grouping unit ok!"); 
-  },
-  function() {
-    console.log("grouping unit error!"); 
-  });*/
   if (!$scope.d.organization) {
     $location.path("/home");
-    //console.dir($scope);
   }
-  //console.log($routeParams);
   $scope.$routeParams = $routeParams;
 }
 SectionViewCtrl.$inject = ['$scope', '$location', '$routeParams', 'userDataService'];
@@ -326,7 +290,11 @@ function ErrorViewCtrl($scope) {
 }
 ErrorViewCtrl.$inject = ['$scope'];
 
-function FolderViewCtrl($scope, user) {
+function FolderViewCtrl($scope, user, PopupService) {
+  
+  $scope.cancel = function() {
+    PopupService.close();
+  }
   
   $scope.filterSender = function(d) {
     if (d === undefined) return d;
@@ -334,9 +302,6 @@ function FolderViewCtrl($scope, user) {
     var r = _.filter(d, function(elem) {
       return true;
     });
-    
-    //$scope.count = r.length;
-    
     return r;
   }
   
@@ -347,13 +312,11 @@ function FolderViewCtrl($scope, user) {
       return true;
     });
     
-    //$scope.count = r.length;
-    //console.dir(d);
     return r;
   }
   
-  $scope.getDownloadLink = function(id) {
-    return user.getdownloaddeliveryurl(id);
+  $scope.getDownloadLink = function(id, id2) {
+    return user.getdownloaddeliveryurl(id, id2);
   }
   
   $scope.group = function(p) {
@@ -451,4 +414,4 @@ function FolderViewCtrl($scope, user) {
     $scope.loading = false;
   });
 }
-FolderViewCtrl.$inject = ['$scope', 'userDataService'];
+FolderViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];

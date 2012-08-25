@@ -51,13 +51,17 @@
         <tbody ng-repeat="profileId in group(profilesOrder)">
           <tr ng-show="deliveriesCount>0" ui-if="profileId != null" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[2])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
           <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId])">
-            <td><a href="{{getDownloadLink(deliveryId)}}" href="">{{deliveries[deliveryId].displayName}}</a></td>
+            <td><a href="{{getDownloadLink(deliveries[deliveryId].currentRevisionId, folderId)}}" href="">{{deliveries[deliveryId].displayName}}</a></td>
             <td><abbr time-ago from-time="{{deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
             <td></td>
-            <td ui-if="d.loaded">{{d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].displayName}}
-            <!--{{d.profileGroups[d.profiles[deliveries[deliveryId].profileId].profileGroupId].displayName[d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].gender]}} {{d.profiles[deliveries[deliveryId].profileId].displayName}}-->
+            <td ui-if="d.loaded">{{d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].displayName}}</td>
+            <td><i ui-if="d.isAdmin==true || deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id" class="icon-pencil"></i>
+            
+            <ng-confirm title="Confirmación" action-text="¿Seguro que desea eliminar el envío?" action-button-text="Eliminar" action-function="cancel()" cancel-button-text="Mantener" cancel-function="cancel()"  ui-if="d.isAdmin==true|| deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id">
+            <a><i class="icon-trash"></i></a>
+            </ng-confirm>
+            
             </td>
-            <td><i class="icon-pencil"></i> <i class="icon-trash"></i></td>
           </tr>
         </tbody>
       </table>
