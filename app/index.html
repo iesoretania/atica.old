@@ -15,7 +15,7 @@
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
     <meta charset="utf-8">
-    <title>ÁTICA</title>
+    <title ng-bind='"ÁTICA - " + (d.organization.displayName || "Cargando...")'>ÁTICA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css" />
     <link rel="shortcut icon" href="themes/default/images/favicon.ico" />
@@ -41,7 +41,6 @@
             </a>
             <ul class="dropdown-menu">
               <li><a ng-href="#/profile"><b>{{d.user.displayName}}</b></a></li>
-              <li><a ng-href="#/selectprofile" disabled="1"><b>{{d.organization.displayName}}</b></a></li>
               <li><a ng-href="#/selectprofile" ng-show="d.profileId">Perfil: <b>{{d.profileGroups[d.profiles[d.profileId].profileGroupId].displayName[d.user.gender]}}</b></a></li>
               <li class="divider"></li>
               <li><a ng-href="#/notifications" ng-show="d.profileId">Notificaciones <span ng-show="d.user.notifications.length>0" class="badge badge-info">{{d.user.notifications.length}}</span></a></li>
@@ -60,7 +59,7 @@
               <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                 <form class="form-horizontal" name="loginform" ng-controller="LoginFormViewCtrl">
                   <b class="loginfield">Usuario:</b><span class="loginform-error" ng-show="loginform.username.$error.pattern"> ¡No válido!</span><br/>
-                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-pattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
+                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-oldpattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
 
                   <b class="loginfield">Contraseña:</b><span class="loginform-error" ng-show="loginform.password.$error.minlength"> ¡Demasiado corta!</span><br/>
                   <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" size="30" ng-model="frm.password" placeholder="Si la ha olvidado, avise al coordinador"/>

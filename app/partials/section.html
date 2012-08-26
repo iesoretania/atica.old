@@ -24,21 +24,21 @@
 
     <div class="framed" ng-repeat="folderId in d.groupings[$routeParams.section_id].folders" ng-controller="FolderViewCtrl">
 
-      <h2>{{d.folders[folderId].displayName}}</h2>
+      <h2>{{folder.displayName}}</h2>
 
       <form ui-if="d.loaded">
         <div class="pull-right">
-          <select ng-model="$parent.uploadFilter" ng-options="showName(key) for key in uploaders"></select><br/>
-          <select ng-show="d.folders[folderId].isDivided" ng-model="$parent.profileFilter" ng-options="showProfile(key) for key in profilesFilterOrder"></select><br />
+          <select ng-show="folder.isDivided && profilesFilterOrder.length>0" ng-model="$parent.profileFilter" ng-options="showProfile(key) for key in profilesFilterOrder"></select><br />
+          <select ng-model="$parent.uploadFilter" ng-show="uploaders.length>0" ng-options="showName(key) for key in uploaders"></select><br/>
         </div>
       </form>
-      <p ng-bind-html="d.folders[folderId].description"></p>
+      <p ng-bind-html="folder.description"></p>
 
       <h3 ui-if="loading">Cargando...</h3>
       <img ui-if="loading" src="img/loading.gif"/>
       <h3 ui-if="error">Se ha producido un problema intentando visualizar el contenido</h3>
 
-      <table class="table table-striped table-hover table-condensed" ng-show="deliveries">
+      <table class="table table-striped table-hover table-condensed" ng-show="deliveries && total>0">
         <thead>
           <tr>
             <th>Documento</th>
@@ -48,22 +48,25 @@
             <th></th>
           </tr>
         </thead>
-        <tbody ng-repeat="profileId in group(profilesOrder)">
-          <tr ng-show="deliveriesCount>0" ui-if="profileId != null" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[2])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
-          <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId])">
-            <td><a href="{{getDownloadLink(deliveries[deliveryId].currentRevisionId, folderId)}}" href="">{{deliveries[deliveryId].displayName}}</a></td>
-            <td><abbr time-ago from-time="{{deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
+        <tbody ng-repeat="profileId in profilesCurrentOrder">
+          <tr ng-show="deliveriesCount>0" ui-if="profileId >= 0" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[2])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
+          <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId], profileId)" ng-controller="FolderDeliveryViewCtrl">
+            <td><a href="{{getDownloadLink(delivery.currentRevisionId, folderId)}}" href="">{{delivery.displayName}}</a></td>
+            <td><abbr time-ago from-time="{{delivery.revisions[delivery.currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
             <td></td>
-            <td ui-if="d.loaded">{{d.persons[deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId].displayName}}</td>
-            <td><i ui-if="d.isAdmin==true || deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id" class="icon-pencil"></i>
+            <td ui-if="d.loaded">{{uploader.displayName}}</td>
+            <td><i ui-if="d.isAdmin==true || uploader.Id==d.user.id" class="icon-pencil"></i>
             
-            <ng-confirm title="Confirmación" action-text="¿Seguro que desea eliminar el envío?" action-button-text="Eliminar" action-function="cancel()" cancel-button-text="Mantener" cancel-function="cancel()"  ui-if="d.isAdmin==true|| deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id">
+            <ng-confirm title="Confirmación" action-text="¿Seguro que desea eliminar el envío?" action-button-text="Sí, elimínalo" action-function="cancel()" cancel-button-text="No, mantenlo" cancel-function="cancel()"  ui-if="d.isAdmin==true|| deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id">
             <a><i class="icon-trash"></i></a>
             </ng-confirm>
             
             </td>
           </tr>
         </tbody>
+        <h4 ui-if="loading==false && total==0">
+          <p>No hay documentos que cumplan con las condiciones indicadas</p>
+        </h4>
       </table>
       
     </div>

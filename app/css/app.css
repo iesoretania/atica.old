@@ -24,14 +24,11 @@ body {
   padding-top: 5px !important;
 }
 
-tr.folder-profilegroup {
+tr.folder-profilegroup td {
   font-weight: bold;
-  background-color: #ddd;
+  background-color: #ddd !important;
   font-variant: small-caps;
   font-size:80%;
-}
-
-tr.folder-profilegroup td {
   line-height: 10px;
 }
 

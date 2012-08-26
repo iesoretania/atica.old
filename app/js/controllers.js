@@ -71,10 +71,19 @@ function LoginFormViewCtrl($scope, $location, user) {
       $scope.frm.password = "";
       $location.path("/selectprofile");
     },
-    function() {
+    function(e) {
       $('input.loginbutton').button('reset');
       $scope.frm.password = "";
-      $scope.frm.error = "Nombre de usuario o contraseña incorrecto";
+      switch(e.status) {
+        case 404:
+          $scope.frm.error = "Nombre de usuario o contraseña incorrecto";
+          break;
+        case 403:
+          $scope.frm.error = "El usuario ha sido bloqueado. Inténtelo de nuevo pasados 10 minutos";
+          break;
+        default:
+          $scope.frm.error = "No se ha podido contactar con el servidor"
+      } 
     });
   }
 
@@ -292,27 +301,88 @@ ErrorViewCtrl.$inject = ['$scope'];
 
 function FolderViewCtrl($scope, user, PopupService) {
   
+
+  $scope.loading = true;
+  $scope.folder = $scope.d.folders[$scope.folderId];
+      
+  $scope.uploadFilter = -2;
+  $scope.profileFilter = -2;
+  
+  $scope.ownProfilesOrder = [];
+  $scope.uploaders = [];
+  $scope.profilesFilterOrder = [];
+  
+  $scope.totalCount = {};
+  $scope.total = 0;
+  
+  $scope.$watch('profileFilter', function(e) {
+    if (e === undefined) return;
+    updateProfileSelect(e);
+  });
+  
+  $scope.$watch('uploadFilter', function(e) {
+    
+    });
+  
+  $scope.$watch('totalCount', function(e) {
+    $scope.total = _.reduce($scope.totalCount, function(sum, e) { return sum+e }, 0);
+    //console.log($scope.total);
+  }, true);
+  
+  function updateProfileSelect(e) {
+  
+    if ($scope.loading == true) return;
+    
+    if (e === -2) {
+      if ($scope.folder.isDivided == false || $scope.d.loaded !== true) {
+        return [-2];
+      }
+      else {
+        $scope.profilesCurrentOrder = $scope.profilesOrder;
+      }
+    }
+    else {
+      if (e === -1) {
+        $scope.profilesCurrentOrder = $scope.ownProfilesOrder;
+      }
+      else {
+        $scope.profilesCurrentOrder = [$scope.profileFilter];
+      }
+    }
+    $scope.uploaders = [];
+    angular.forEach($scope.profilesCurrentOrder, function(prof) {
+      angular.forEach($scope.deliveriesOrder[prof], function(e) {
+        var value = $scope.getUploader(e);
+        if (_.indexOf($scope.uploaders, value) == -1) {
+          $scope.uploaders.push(value);
+        }
+      });
+    });
+    
+    $scope.uploaders = _.sortBy($scope.uploaders, function (e) {
+        
+      if (e == $scope.d.user.id) return "";
+        
+      return $scope.d.persons[e].displayName || ("Persona "+e);
+    });
+    
+    // put "All uploaders" option at the top
+    $scope.uploaders.unshift(-2);
+    if (_.indexOf($scope.uploaders, $scope.uploadFilter) == -1) {
+      // if previous uploader filter is no longer applicable,
+      // reset to "all uploaders"
+      $scope.uploadFilter = -2;
+    }
+    $scope.profilesFilterOrder = _.clone($scope.profilesOrder);
+    if ($scope.ownProfilesOrder.length>0) {
+      $scope.profilesFilterOrder.unshift(-1);
+    }
+    $scope.profilesFilterOrder.unshift(-2);  
+    $scope.totalCount = {};
+  }
+  
   $scope.cancel = function() {
     PopupService.close();
-  }
-  
-  $scope.filterSender = function(d) {
-    if (d === undefined) return d;
-    
-    var r = _.filter(d, function(elem) {
-      return true;
-    });
-    return r;
-  }
-  
-  $scope.filterProfileGroup = function(d) {
-    if (d === undefined) return d;
-    
-    var r = _.filter(d, function(elem) {
-      return true;
-    });
-    
-    return r;
   }
   
   $scope.getDownloadLink = function(id, id2) {
@@ -324,9 +394,9 @@ function FolderViewCtrl($scope, user, PopupService) {
     var folder = $scope.d.folders[$scope.$parent.folderId];
     //console.log($scope.$parent.folderId);
     if (($scope.d.loaded != true) || (folder.isDivided == false)) {
-      return [null];
+      return [-2];
     }
-    if ($scope.profileFilter == null) {
+    if ($scope.profileFilter == -2) {
       return p;
     }
     if ($scope.profileFilter == -1) {
@@ -335,21 +405,26 @@ function FolderViewCtrl($scope, user, PopupService) {
     return [$scope.profileFilter];
   }
   
-  $scope.filterDelivery = function(p) {
+  $scope.getUploader = function(deliveryId) {
+    return $scope.deliveries[deliveryId].revisions[$scope.deliveries[deliveryId].currentRevisionId].uploaderPersonId;
+  }
+  
+  $scope.filterDelivery = function(p,pid) {
     if (p === undefined) return p;
     
-    if ($scope.uploadFilter == null) {
+    if ($scope.uploadFilter == -2) {
       $scope.$parent.deliveriesCount = p.length;
+      $scope.totalCount[pid] = p.length;
       return p;
     }
     var out = [];
     angular.forEach(p, function(e) {
-      if ($scope.deliveries[e].revisions[$scope.deliveries[e].currentRevisionId].uploaderPersonId == $scope.uploadFilter) {
+      if ($scope.getUploader(e) == $scope.uploadFilter) {
         out.push(e);
-      }
+        }
     });
     $scope.$parent.deliveriesCount = out.length;
-    
+    $scope.totalCount[pid] = out.length;
     return out;
   }
   
@@ -357,61 +432,48 @@ function FolderViewCtrl($scope, user, PopupService) {
     return str.toUpperCase();
   }
   
-  $scope.getUploader = function(deliveryId) {
-    return $scope.deliveries[deliveryId].revisions[$scope.deliveries[deliveryId].currentRevisionId].uploaderPersonId;
-  }
-  
   $scope.showName = function(key) {
-    if (key == null) return "Todos los documentos";
+    if (key == -2) return "Todos los envíos";
     if (key == $scope.d.user.id) return "Sólo los míos";
     return $scope.d.persons[key].displayName;
   }
   
   $scope.showProfile = function(key) {
-    if (key === null) return "Todos los perfiles";
+    if (key === -2) return "Todos los perfiles";
     if (key === -1) return "Mis perfiles";
     return $scope.d.profileGroups[$scope.d.profiles[key].profileGroupId].displayName[2]+" "+$scope.d.profiles[key].displayName;
   }
-  
-  $scope.loading = true;
-  
-  $scope.uploadFilter = null;
-  $scope.profileFilter = null;
+
     
   user.getfolder($scope.$parent.folderId, ($scope.d.loaded!=true), function(e) {
     $scope.loading = false;
     $scope.deliveries = e.deliveries;
     $scope.deliveriesOrder = e.deliveriesOrder;
-    $scope.deliveriesOrder[null] = _.flatten($scope.deliveriesOrder);
+    $scope.deliveriesOrder[-2] = _.flatten($scope.deliveriesOrder);
     $scope.profilesOrder = e.profilesOrder;
+    $scope.ownProfilesOrder = [];
+   
+    $scope.profilesCurrentOrder = [-2];
     
-    if ($scope.d.loaded) {
-      $scope.uploaders = [];
-    
-      angular.forEach($scope.deliveriesOrder[null], function(e) {
-        var value = $scope.getUploader(e);
-        if (_.indexOf($scope.uploaders, value) == -1) {
-          $scope.uploaders.push(value);
-        }
-      });
-      //console.log("Sin ordenar");
-      //console.dir($scope.uploaders);
-      $scope.uploaders = _.sortBy($scope.uploaders, function (e) {
-        
-        if (e == $scope.d.user.id) return "";
-        
-        return $scope.d.persons[e].displayName;
-      });
-      //console.log("Ordenada");
-      $scope.uploaders.unshift(null);
-      //console.dir($scope.uploaders);
-      $scope.profilesFilterOrder = _.clone($scope.profilesOrder);
-      $scope.profilesFilterOrder.unshift(-1);
-      $scope.profilesFilterOrder.unshift(null);
+    if ($scope.d.loaded == true) {
+      $scope.ownProfilesOrder = _.intersection(e.profilesOrder, $scope.d.user.profiles[$scope.d.snapshotId]);
+      if ($scope.folder.isDivided == true) {
+        $scope.profilesCurrentOrder = $scope.profilesOrder;
+      }
+            
     }
+    updateProfileSelect(-2);
   }, function () {
     $scope.error = true;
     $scope.loading = false;
   });
 }
 FolderViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];
+
+function FolderDeliveryViewCtrl($scope, user, PopupService) {
+  $scope.delivery = $scope.deliveries[$scope.deliveryId];
+  $scope.revision = $scope.delivery.revisions[$scope.delivery.currentRevisionId];
+  if ($scope.d.persons !== undefined) $scope.uploader = $scope.d.persons[$scope.revision.uploaderPersonId];
+  
+}
+FolderDeliveryViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];

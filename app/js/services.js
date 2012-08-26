@@ -19,6 +19,14 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
     
     var folderService = $resource('/~ixl03065/3to5/api/index.php/v1/folder/:folderId');
     
+    var refreshService = $resource('/~ixl03065/3to5/api/index.php/v1/refreshtoken', {
+      token:'@token'
+    });
+    
+    var logoutService = $resource('/~ixl03065/3to5/api/index.php/v1/logout', {
+      token:'@token'
+    });
+    
     var _scope = {};
     
     _scope.profile = null;
@@ -76,6 +84,62 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       }
 
     });
+    
+    var tokenRefresh = null;
+    
+    var tokenRefreshRetries = 0;
+    
+    var doLogout = function() {
+      _scope.loaded = false;
+      delete _scope.user;
+      delete _scope.profileId;
+      delete _scope.profileGroups;
+      delete _scope.profiles;
+      delete _scope.folders;
+      delete _scope.groupings;
+      delete _scope.events;
+      delete _scope.snapshotId
+        
+      if (tokenRefresh !== null) {
+        tokenRefreshRetries = -1;
+        $timeout.cancel(tokenRefresh);
+        tokenRefresh = null;
+      }
+      
+      var action = new logoutService({
+        'token': accessToken
+      }).$save();
+      
+      //_scope.user=false;
+      _setOrganization(_scope.organization.id);
+    }
+    
+    var doTokenRefresh = function() {
+      var action;
+      action = new refreshService({
+        'token': accessToken
+      });
+      //console.log('Refreshing token...');
+      action.$save(function(result) {
+        if (result.expiresIn>60) {
+          tokenRefresh = $timeout(doTokenRefresh, (result.expiresIn / 2)*1000, false);
+          tokenRefreshRetries = 0;
+          //console.log('...ok! Next refresh in '+result.expiresIn / 2+' seconds');
+        }
+      }, function() {
+        if (tokenRefreshRetries >= 0) {
+          if (tokenRefreshRetries > 5) {
+            //console.log('...error! Too many tries, so logging out!');
+            $scope.$apply(doLogout);
+          }
+          else {
+            //console.log('...error! Trying again in 1 minute');
+            tokenRefresh = $timeout(doTokenRefresh, 60000, false);
+            tokenRefreshRetries = tokenRefreshRetries + 1;
+          }
+        }
+      });
+    }
        
     return {
       setOrganization: _setOrganization,
@@ -128,28 +192,21 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           _scope.snapshotId = result.snapshotId.toString();
           _scope.isAdmin = result.userData.isGlobalAdministrator || result.isLocalAdministrator;
           accessToken = result.accessToken;
+          if (result.expiresIn>60) {
+            tokenRefresh = $timeout(doTokenRefresh, (result.expiresIn / 2)*1000, false);
+          }
           //console.dir(_scope.user);
+          tokenRefreshRetries = 0;
           okFn();
         },
-        function()
+        function(e)
         {
+          console.dir(e);
           // Error
-          errorFn();
+          errorFn(e);
         });
       },
-      logout: function() {
-        _scope.loaded = false;
-        delete _scope.user;
-        delete _scope.profileId;
-        delete _scope.profileGroups;
-        delete _scope.profiles;
-        delete _scope.folders;
-        delete _scope.groupings;
-        delete _scope.events;
-        
-        //_scope.user=false;
-        _setOrganization(_scope.organization.id);
-      },
+      logout: doLogout,
       loaddata: function(snapshot, fnOk, fnError) {
         if (snapshot != _scope.loadedSnapshotId) {
           snapshotDataService.get({
