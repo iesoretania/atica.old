@@ -6,6 +6,8 @@ angular.module('aticaApp', ['ngSanitize', 'aticaApp.filters', 'aticaApp.services
   config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: HomeViewCtrl});
     $routeProvider.when('/home/:organization_id', {templateUrl: 'partials/home.html', controller: HomeViewCtrl});
+    $routeProvider.when('/browser', {templateUrl: 'partials/browser.html', controller: BrowserViewCtrl});
+    $routeProvider.when('/browser/:categoryId', {templateUrl: 'partials/browser.html', controller: BrowserViewCtrl});
     $routeProvider.when('/error', {templateUrl: 'partials/error.html', controller: ErrorViewCtrl});
     $routeProvider.when('/activity/:activityId', {templateUrl: 'partials/activity.html', controller: ActivityViewCtrl});
     $routeProvider.when('/calendar', {templateUrl: 'partials/calendar.html', controller: CalendarViewCtrl});

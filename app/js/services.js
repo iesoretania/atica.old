@@ -27,6 +27,8 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       token:'@token'
     });
     
+    var categoryService = $resource('/~ixl03065/3to5/api/index.php/v1/category/:categoryId');
+    
     var _scope = {};
     
     _scope.profile = null;
@@ -98,7 +100,9 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       delete _scope.folders;
       delete _scope.groupings;
       delete _scope.events;
-      delete _scope.snapshotId
+      delete _scope.snapshotId;
+      delete _scope.loadedSnapshotId;
+      delete _scope.categories;
         
       if (tokenRefresh !== null) {
         tokenRefreshRetries = -1;
@@ -201,7 +205,6 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         },
         function(e)
         {
-          console.dir(e);
           // Error
           errorFn(e);
         });
@@ -261,6 +264,24 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         }
         
         return r;
+      },
+      loadcategorytree: function(force, fnOk, fnError) {
+        if (force || angular.isDefined(_scope.categories) == false) {
+        categoryService.get({
+            'snapshotId': _scope.snapshotId, 
+            'token': accessToken
+          }, function(e) {
+            _scope.categories = e.categories;
+            _scope.categoriesOrder = e.categoriesOrder;
+            fnOk(e);
+          }, function() {
+            //_scope.cat = false;
+            fnError();
+          });
+        }
+        else {
+          fnOk();
+        }
       }
       
     };

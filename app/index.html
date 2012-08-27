@@ -59,10 +59,10 @@
               <div class="dropdown-menu" style="padding: 15px; padding-bottom: 0px;">
                 <form class="form-horizontal" name="loginform" ng-controller="LoginFormViewCtrl">
                   <b class="loginfield">Usuario:</b><span class="loginform-error" ng-show="loginform.username.$error.pattern"> ¡No válido!</span><br/>
-                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-minlength="5" ng-oldpattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
+                  <input id="username" style="margin-bottom: 15px;" required type="text" name="username" ng-change="frm.error=''" ng-minlength="5" ng-oldpattern="/^[A-Za-z]{7}[0-9]{3}[A-Za-z]?$/" size="30" placeholder="El mismo usado en Séneca" ng-model="frm.username" />
 
                   <b class="loginfield">Contraseña:</b><span class="loginform-error" ng-show="loginform.password.$error.minlength"> ¡Demasiado corta!</span><br/>
-                  <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-minlength="5" size="30" ng-model="frm.password" placeholder="Si la ha olvidado, avise al coordinador"/>
+                  <input id="userpassword" style="margin-bottom: 15px;" required type="password" name="password" ng-change="frm.error=''" ng-minlength="5" size="30" ng-model="frm.password" placeholder="Si la ha olvidado, avise al coordinador"/>
 
                   <span class="loginform-error" ng-show="frm.error"><b>{{frm.error}}</b><br/></span>
                   <input class="btn btn-primary loginbutton" type="submit" name="commit" ng-disabled="loginform.$invalid" value="Entrar" ng-click="login(frm.username,frm.password)" autocomplete="off" data-loading-text="Conectando..." />

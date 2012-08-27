@@ -251,6 +251,8 @@ HomeViewCtrl.$inject = ['$scope', '$routeParams', 'userDataService'];
 function NewsViewCtrl($scope) {
 }
 
+NewsViewCtrl.$inject = ['$scope'];
+
 function ProfileViewCtrl($scope, $location, user) {
   if (!$scope.d.user) {
     $location.path("/home");
@@ -429,16 +431,19 @@ function FolderViewCtrl($scope, user, PopupService) {
   }
   
   $scope.toUpperCase = function(str) {
+    if (str === undefined) return "";
     return str.toUpperCase();
   }
   
   $scope.showName = function(key) {
+    if (key === undefined) return "";
     if (key == -2) return "Todos los envíos";
     if (key == $scope.d.user.id) return "Sólo los míos";
     return $scope.d.persons[key].displayName;
   }
   
   $scope.showProfile = function(key) {
+    if (key === undefined) return "";
     if (key === -2) return "Todos los perfiles";
     if (key === -1) return "Mis perfiles";
     return $scope.d.profileGroups[$scope.d.profiles[key].profileGroupId].displayName[2]+" "+$scope.d.profiles[key].displayName;
@@ -477,3 +482,19 @@ function FolderDeliveryViewCtrl($scope, user, PopupService) {
   
 }
 FolderDeliveryViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];
+
+function BrowserViewCtrl($scope, $location, $routeParams, user) {
+  if (!$scope.d.user) {
+    $location.path("/home");
+  }
+  
+  $scope.categoryId = $routeParams.categoryId;
+  
+  user.loadcategorytree(false, function() {
+  
+  }, function() {
+   
+  });
+}
+
+BrowserViewCtrl.$inject = ['$scope', '$location',  '$routeParams', 'userDataService'];
