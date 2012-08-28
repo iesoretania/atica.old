@@ -317,6 +317,9 @@ function FolderViewCtrl($scope, user, PopupService) {
   $scope.totalCount = {};
   $scope.total = 0;
   
+  $scope.folderEditEnabled = ($scope.d.isAdmin==true) || (_.intersect($scope.folder.managers, $scope.d.user.profileGroups).length>0);
+  $scope.folderUploadEnabled = $scope.folderEditEnabled || ($scope.d.isAdmin==true) || (_.intersect($scope.folder.uploaders, $scope.d.user.profileGroups).length>0);
+  
   $scope.$watch('profileFilter', function(e) {
     if (e === undefined) return;
     updateProfileSelect(e);
@@ -402,7 +405,7 @@ function FolderViewCtrl($scope, user, PopupService) {
       return p;
     }
     if ($scope.profileFilter == -1) {
-      return _.intersection(p, $scope.d.user.profiles);
+      return _.intersection(p, $scope.d.user.profiles[$scope.d.snapshotId]);
     }
     return [$scope.profileFilter];
   }
@@ -444,8 +447,9 @@ function FolderViewCtrl($scope, user, PopupService) {
   
   $scope.showProfile = function(key) {
     if (key === undefined) return "";
-    if (key === -2) return "Todos los perfiles";
-    if (key === -1) return "Mis perfiles";
+    if (key == -2) return "Todos los perfiles";
+    if (key == -1) return "Mis perfiles";
+    if ($scope.d.profiles[key] === undefined) return "Error "+key;
     return $scope.d.profileGroups[$scope.d.profiles[key].profileGroupId].displayName[2]+" "+$scope.d.profiles[key].displayName;
   }
 
@@ -455,7 +459,7 @@ function FolderViewCtrl($scope, user, PopupService) {
     $scope.deliveries = e.deliveries;
     $scope.deliveriesOrder = e.deliveriesOrder;
     $scope.deliveriesOrder[-2] = _.flatten($scope.deliveriesOrder);
-    $scope.profilesOrder = e.profilesOrder;
+    $scope.profilesOrder = _.filter(e.profilesOrder, function(p) { return e !== null});
     $scope.ownProfilesOrder = [];
    
     $scope.profilesCurrentOrder = [-2];
@@ -475,10 +479,28 @@ function FolderViewCtrl($scope, user, PopupService) {
 }
 FolderViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];
 
+function FolderProfileGroupViewCtrl($scope) {
+  $scope.genderShown = -1;
+}
+
+FolderProfileGroupViewCtrl.$inject = ['$scope'];
+
 function FolderDeliveryViewCtrl($scope, user, PopupService) {
   $scope.delivery = $scope.deliveries[$scope.deliveryId];
   $scope.revision = $scope.delivery.revisions[$scope.delivery.currentRevisionId];
-  if ($scope.d.persons !== undefined) $scope.uploader = $scope.d.persons[$scope.revision.uploaderPersonId];
+  if ($scope.d.persons !== undefined) {
+    $scope.uploader = $scope.d.persons[$scope.revision.uploaderPersonId];
+    $scope.editEnabled = $scope.folderEditEnabled || ($scope.uploader.id==$scope.d.user.id);
+    // Allow detecting gender of each profile
+    if ($scope.$parent.$parent.genderShown == -1) {
+      $scope.$parent.$parent.genderShown = $scope.uploader.gender;
+    }
+    else {
+      if (($scope.$parent.$parent.genderShown != 2) && ($scope.$parent.$parent.genderShown != $scope.uploader.gender)) {
+        $scope.$parent.$parent.genderShown = 2;
+      }
+    }
+  }
   
 }
 FolderDeliveryViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];

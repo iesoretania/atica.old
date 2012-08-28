@@ -20,7 +20,19 @@
       </small>
     </div>
 
-
+    <div id="deleteModal" class="modal hide">
+      <div class="modal-header">
+        <button class="close" modal-close="myModal">×</button>
+        <h3>Eliminar envío</h3>
+      </div>
+      <div class="modal-body">
+        <h4>¿Está seguro de que quiere eliminar el documento?</h4>
+      </div>
+      <div class="modal-footer">
+        <a href="" class="btn btn-danger">Sí, deseo eliminarlo</a>
+        <a href="" class="btn btn-primary" modal-close="myModal">No, mantenerlo</a>
+      </div>
+    </div>
 
     <div class="framed" ng-repeat="folderId in d.groupings[$routeParams.section_id].folders" ng-controller="FolderViewCtrl">
 
@@ -48,27 +60,24 @@
             <th></th>
           </tr>
         </thead>
-        <tbody ng-repeat="profileId in profilesCurrentOrder">
-          <tr ng-show="deliveriesCount>0" ui-if="profileId >= 0" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[2])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
+        <tbody ng-repeat="profileId in profilesCurrentOrder" ng-controller="FolderProfileGroupViewCtrl">
+          <tr ng-show="deliveriesCount>0" ui-if="profileId >= 0" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[genderShown])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
           <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId], profileId)" ng-controller="FolderDeliveryViewCtrl">
             <td><a href="{{getDownloadLink(delivery.currentRevisionId, folderId)}}" href="">{{delivery.displayName}}</a></td>
             <td><abbr time-ago from-time="{{delivery.revisions[delivery.currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
             <td></td>
             <td ui-if="d.loaded">{{uploader.displayName}}</td>
-            <td><i ui-if="d.isAdmin==true || uploader.Id==d.user.id" class="icon-pencil"></i>
-            
-            <ng-confirm title="Confirmación" action-text="¿Seguro que desea eliminar el envío?" action-button-text="Sí, elimínalo" action-function="cancel()" cancel-button-text="No, mantenlo" cancel-function="cancel()"  ui-if="d.isAdmin==true|| deliveries[deliveryId].revisions[deliveries[deliveryId].currentRevisionId].uploaderPersonId==d.user.id">
-            <a><i class="icon-trash"></i></a>
-            </ng-confirm>
-            
+            <td><i ui-if="editEnabled" class="icon-pencil"></i>
+            <a ui-if="editEnabled" modal-open="deleteModal"><i class="icon-trash"></i></a>
             </td>
-          </tr>
+        </tr>
         </tbody>
-        <h4 ui-if="loading==false && total==0">
+        <h4 ui-if="(loading==false) && total==0">
           <p>No hay documentos que cumplan con las condiciones indicadas</p>
         </h4>
+        
       </table>
-      
+      <p><a href="" class="btn btn-info" type="button" ng-href="#/upload/{{folderId}}/0/{{$routeParams.section_id}}/0" ng-show="(loading==false) && folderUploadEnabled">Subir un nuevo documento</a>&nbsp;&nbsp;<a href="" class="btn btn-danger" disabled="1" type="button" ng-show="folderEditEnabled && (loading==false) && total>0">Eliminar todos los documentos</a></p>
     </div>
     <hr />
     <footer>

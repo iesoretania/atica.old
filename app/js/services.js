@@ -134,7 +134,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         if (tokenRefreshRetries >= 0) {
           if (tokenRefreshRetries > 5) {
             //console.log('...error! Too many tries, so logging out!');
-            $scope.$apply(doLogout);
+            $timeout(doLogout, 0);
           }
           else {
             //console.log('...error! Trying again in 1 minute');
@@ -225,6 +225,9 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
             _scope.loadedSnapshotId = snapshot;
             _scope.persons = e.persons;
             _scope.folders = e.folders;
+            _scope.user.profileGroups = _.uniq(_.map(_scope.user.profiles[snapshot], function(e) {
+              return _scope.profiles[e].profileGroupId;
+            }));
             fnOk(e);
           }, function() {
             _scope.loaded = false;
