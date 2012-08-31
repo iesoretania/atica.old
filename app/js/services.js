@@ -85,6 +85,8 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         _setOrganization(_scope.organizations[0].id);
       }
 
+    }, function() {
+      _scope.error = true;
     });
     
     var tokenRefresh = null;

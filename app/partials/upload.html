@@ -1,0 +1,93 @@
+<div class="row-fluid">
+
+  <!-- Sidebar -->
+  <div class="span2">
+  </div>
+
+  <!-- Main content -->
+  <div class="span8">
+    <ul class="breadcrumb">
+      <li>
+        <a ng-href="#/home">Inicio</a> <span class="divider">/</span>
+      </li>
+      <li ng-show="categoryId"><a ng-href="#/browser">Documentos</a><span class="divider">/</span></li>
+      <li ng-show="categoryId"><a ng-href="#/browser/{{categoryId}}">{{d.categories[categoryId].displayName}}</a><span class="divider">/</span></li>
+      <li ng-show="groupingId">Secciones<span class="divider">/</span></li>
+      <li ng-show="groupingId"><a ng-href="#/section/{{groupingId}}">{{d.groupings[groupingId].displayName}}</a><span class="divider">/</span></li>
+      <li>{{folder.displayName}}<span class="divider">/</span> </li>
+      <li class="active">Nuevo documento</li>
+    </ul>
+    <div class="well">
+      <h1>Subida de nuevos documentos</h1>
+      <small class="muted">
+        Desde aquí podrá enviar uno o varios documentos a la carpeta asociándolos a cualquiera de sus perfiles.
+      </small>
+    </div>
+    <form id="fileupload" ng-submit="" action="/~ixl03065/3to5/upload/index.php" method="POST" class="form-horizontal" enctype="multipart/form-data">
+      <fieldset>
+        <div class="control-group">
+          <label class="control-label" for="uploadProfile">Perfil de subida</label>
+          <div class="controls">
+
+
+            <select id="snapshot" ng-model="profileId" ng-options="getProfileName(key) for key in uploadProfiles" ng-disabled="!ready"></select>
+            <span class="help-block muted" ui-if="folderEditEnabled">Como gestor de la carpeta puede elegir cualquier perfil al que se le permita enviar documentos.</span>
+            <span class="help-block muted" ui-if="!folderEditEnabled">Elija a cuál de sus perfiles desea asociar el envío del documento.</span>
+          </div>
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <!--input class="btn btn-primary" id="start" autocomplete="off" type="button" value="Enviar" data-loading-text="Enviando..."></input-->
+        <span class="btn btn-success fileinput-button" ng-show="ready">
+          <i class="icon-plus icon-white"></i>
+          <span>Añadir documentos...</span>
+          <input type="file" name="files[]" multiple>
+        </span>
+        <button type="button" class="btn btn-primary start" ng-click="doUploadNext(this)" ng-show="ready" ng-disabled="uploadFiles.length==0">
+          <i class="icon-upload icon-white"></i>
+          <span>Comenzar envío</span>
+        </button>
+        <button type="button" class="btn btn-warning cancel" ng-click="cancelUpload()" ng-show="!ready">
+          <i class="icon-ban-circle icon-white"></i>
+          <span>Cancelar envío</span>
+        </button>
+
+      </div>
+
+      <!--div class="progress progress-striped active" ng-show="!ready">
+        <div class="bar" style="width: {{uploadProgress}}%;"></div>
+      </div-->
+      <table class="table table-upload" ng-show="uploadFiles.length>0">
+        <thead>
+          <tr>
+            <th></th><th>Nombre del fichero</th><th>Tamaño</th><th>Descripción</th><th></th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="file in uploadFiles">
+            <td><i ng-class="fileStatusIcon(file.context)"></i></td>
+            <td>{{file.files[0].name}}</td>
+            <td>{{formatSize(file.files[0].size)}}</td>
+            <td><input type="text" ng-model="uploadDescriptions[file.context]" class="input-xlarge" placeholder="{{prepareFilename(file.files[0].name)}}" ng-disabled="uploadStatus[file.context]!=0"/></td>
+            <td><span ui-if="uploadStatusProgress[file.context]>0">{{uploadStatusProgress[file.context]}}%</span></td>
+            <td><button type="button" class="btn btn-danger" style="width:160px !important" ng-click="removeFile(file.context)" ng-show="uploadStatus[file.context]==0 || uploadStatus[file.context]==3">
+                <i class="icon-remove icon-white"></i>
+                <span>Eliminar documento</span>
+              </button>
+              <div class="progress progress-striped"  style="width:160px !important" ng-class="{active:uploadStatus[file.context]==1}" ng-show="uploadStatus[file.context]==1 || uploadStatus[file.context]==2">
+                <div class="bar" style="width: {{uploadStatusProgress[file.context]}}%;"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+
+
+    </form>
+    <hr />
+    <footer>
+      <p>&copy; Grupo de trabajo ÁTICA, 2009-2012</p>
+    </footer>
+  </div>
+</div>

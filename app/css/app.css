@@ -126,3 +126,11 @@ div.framed {
   color: #999 !important;
   display: block !important;
 }
+
+table.table-upload td {
+  vertical-align: middle !important;
+}
+
+table.table-upload div.progress {
+  margin-bottom: 0 !important;
+}

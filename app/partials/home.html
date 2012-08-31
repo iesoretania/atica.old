@@ -6,11 +6,15 @@
 
   <!-- Main content -->
   <div class="span10">
+    <div ng-show="(d.error == true)" class="alert alert-error">
+      No puedo conectar con el servidor. Por favor, vuelva a intentarlo más tarde recargando la página pasados unos minutos.
+    </div>
     <ul class="breadcrumb">
       <li class="active">
         <a ng-href="#/home">Inicio</a> 
       </li>
     </ul>
+
     <!-- Welcome -->
     <div class="well" ng-show="d.user">
       <h1>{{{0: 'Bienvenido', 1: 'Bienvenida'}[d.user.gender]}} a la plataforma ÁTICA</h1>
@@ -34,12 +38,46 @@
       </h1>
       <p>La parte superior de la página contiene accesos rápidos a esta pantalla de inicio, el árbol de documentos del Sistema de Gestión de la Calidad, el cambio de perfil activo y un menú de herramientas. Tras ello, encontrará un cuadro de texto mediante el cual podrá realizar búsquedas. Finalmente, en el lado derecho, hay un menú desplegable donde podrá obtener información acerca de sus datos personales, permitiendo su rectificación y la salida de la aplicación.</p>
       <p>No olvide que puede contactar con el coordinador de calidad en cualquier momento en caso de duda.</p>
-      <h1>
-        Nuevos documentos <small>(desde su última entrada)</small>
-      </h1>
-      <h1>
-        Nuevos eventos <small>(desde su última entrada)</small>
-      </h1>
+      <div ui-if="d.user.newDocuments.length>0">
+        <h1>
+          Nuevos documentos <small>(desde su última entrada)</small>
+        </h1>
+        <table class="table table-condensed table-striped">
+          <thead>
+            <tr>
+              <th>Sección</th><th>Carpeta</th><th>Documento</th><th>Enviado por</th><th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="data in d.user.newDocuments">
+              <td>{{d.groupings[data.groupingId].displayName}}</td>
+              <td>{{d.folders[data.folderId].displayName}}</td>
+              <td>{{data.delivery.displayName}}</td>
+              <td>{{data.delivery.displayName}}</td>
+              <td><span time-ago from-time="{{data.delivery.revisions[data.delivery.currentRevisionId].uploadDate}}"></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div ui-if="d.user.newEvents.length>0">
+        <h1>
+          Nuevos eventos <small>(desde su última entrada)</small>
+        </h1>
+        <table class="table table-condensed table-striped">
+          <thead>
+            <tr>
+              <th>Actividad</th><th>Evento</th><th>Fechas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="data in d.user.newEvents">
+              <td>{{d.activities[data.activityId].displayName}}</td>
+              <td>{{d.events[data.eventId].displayName}}</td>
+              <td>{{d.events[data.eventId].fromTime}}-{{d.events[data.eventId].duration}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <!-- First steps for guests -->
     <div ng-show="!d.user"> 

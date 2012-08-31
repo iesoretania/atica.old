@@ -22,6 +22,7 @@
     <link rel="apple-touch-icon" href="themes/default/images/mobile-favicon.png" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-responsive.css" />
+    <link rel="stylesheet" href="lib/jquery-fileupload/css/jquery.fileupload-ui.css" />
   </head>
   <body ng-controller='MainViewCtrl'>
     <div class="navbar navbar-fixed-top navbar-inverse" ng-cloak>
@@ -75,7 +76,7 @@
           <!-- Top navbar -->
           <div class="nav-collapse">
             <ul class="nav">
-              <li ng-class="isActive($location,'/home')"><a href="#">Inicio</a></li>
+              <li ng-class="isActive($location,'/home')" ng-show="!d.user || d.loaded"><a href="#">Inicio</a></li>
               <li ng-class="isActive($location,'/browser')" ng-show="d.loaded"><a href="#/browser">Documentos</a></li>
               <!-- Profile dropdown -->
               <li class="dropdown" ng-show="d.loaded">
@@ -125,7 +126,9 @@
     <script src="lib/angular/angular-resource.min.js"></script>
     <script src="lib/angular/angular-sanitize.min.js"></script>
     <script src="lib/angular/i18n/angular-locale_es-es.js"></script>
-    <!--script src="lib/angular/i18n/angular-locale-es.js"></script -->
+    <script src="lib/jquery-fileupload/js/vendor/jquery.ui.widget.js"></script>
+    <script src="lib/jquery-fileupload/js/jquery.iframe-transport.js"></script>
+    <script src="lib/jquery-fileupload/js/jquery.fileupload.js"></script>
 
     <script src="js/app.js"></script>
     <script src="js/services.js"></script>

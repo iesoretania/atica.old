@@ -64,7 +64,7 @@
           <tr ng-show="deliveriesCount>0" ui-if="profileId >= 0" class="folder-profilegroup"><td colspan="3"></td><td ui-if="d.loaded">{{toUpperCase(d.profileGroups[d.profiles[profileId].profileGroupId].displayName[genderShown])}} {{toUpperCase(d.profiles[profileId].displayName)}}</td><td></td></tr>
           <tr ng-repeat="deliveryId in filterDelivery(deliveriesOrder[profileId], profileId)" ng-controller="FolderDeliveryViewCtrl">
             <td><a href="{{getDownloadLink(delivery.currentRevisionId, folderId)}}" href="">{{delivery.displayName}}</a></td>
-            <td><abbr time-ago from-time="{{delivery.revisions[delivery.currentRevisionId].uploadDate}}" title="{{fromTime | date:'medium'}}"></abbr></td>
+            <td><abbr time-ago from-time="{{delivery.revisions[delivery.currentRevisionId].uploadDate}}" title="{{delivery.revisions[delivery.currentRevisionId].uploadDate | date:'medium'}}"></abbr></td>
             <td></td>
             <td ui-if="d.loaded">{{uploader.displayName}}</td>
             <td><i ui-if="editEnabled" class="icon-pencil"></i>
@@ -77,8 +77,11 @@
         </h4>
         
       </table>
-      <p><a href="" class="btn btn-info" type="button" ng-href="#/upload/{{folderId}}/0/{{$routeParams.section_id}}/0" ng-show="(loading==false) && folderUploadEnabled">Subir un nuevo documento</a>&nbsp;&nbsp;<a href="" class="btn btn-danger" disabled="1" type="button" ng-show="folderEditEnabled && (loading==false) && total>0">Eliminar todos los documentos</a></p>
-    </div>
+      <p>
+        <div class="control-group">
+        <a href="" class="btn btn-info" type="button" ng-href="#/upload/{{folderId}}/0/{{$routeParams.section_id}}/0" ng-show="(loading==false) && folderUploadEnabled">Subir un nuevo documento</a>&nbsp;&nbsp;<a href="" class="btn btn-danger" disabled="1" type="button" ng-show="folderEditEnabled && (loading==false) && total>0">Eliminar todos los documentos</a>
+        </div>
+      </p>
     <hr />
     <footer>
       <p>&copy; Grupo de trabajo ÁTICA, 2009-2012</p>

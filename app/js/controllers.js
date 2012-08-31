@@ -240,13 +240,17 @@ function CalendarItemViewCtrl($scope, $location) {
 CalendarItemViewCtrl.$inject = ['$scope', "$location"];
 
 
-function HomeViewCtrl($scope, $routeParams, user) {
+function HomeViewCtrl($scope, $routeParams, $location, user) {
   if (angular.isDefined($routeParams.organization_id) && angular.isDefined($scope.d.organization) && ($routeParams.organization_id != $scope.d.organization)) {
     user.setOrganization($routeParams.organization_id);
   }
+  if ($scope.d.user && !$scope.d.loaded) {
+    $location.path("/selectprofile");
+    return;
+  }
 }
 
-HomeViewCtrl.$inject = ['$scope', '$routeParams', 'userDataService'];
+HomeViewCtrl.$inject = ['$scope', '$routeParams', "$location", 'userDataService'];
 
 function NewsViewCtrl($scope) {
 }
@@ -256,6 +260,7 @@ NewsViewCtrl.$inject = ['$scope'];
 function ProfileViewCtrl($scope, $location, user) {
   if (!$scope.d.user) {
     $location.path("/home");
+    return;
   }
   $('#start').on('click', function () {
     $(this).button('loading');
@@ -284,6 +289,7 @@ ProfileViewCtrl.$inject = ['$scope', '$location', 'userDataService'];
 function ActivityViewCtrl($scope, $location) {
   if (!$scope.d.user) {
     $location.path("/home");
+    return;
   }
 }
 ActivityViewCtrl.$inject = ['$scope', '$location'];
@@ -292,6 +298,7 @@ ActivityViewCtrl.$inject = ['$scope', '$location'];
 function SectionViewCtrl($scope, $location, $routeParams, user) {
   if (!$scope.d.organization) {
     $location.path("/home");
+    return;
   }
   $scope.$routeParams = $routeParams;
 }
@@ -330,8 +337,10 @@ function FolderViewCtrl($scope, user, PopupService) {
     });
   
   $scope.$watch('totalCount', function(e) {
-    $scope.total = _.reduce($scope.totalCount, function(sum, e) { return sum+e }, 0);
-    //console.log($scope.total);
+    $scope.total = _.reduce($scope.totalCount, function(sum, e) {
+      return sum+e
+    }, 0);
+  //console.log($scope.total);
   }, true);
   
   function updateProfileSelect(e) {
@@ -426,7 +435,7 @@ function FolderViewCtrl($scope, user, PopupService) {
     angular.forEach(p, function(e) {
       if ($scope.getUploader(e) == $scope.uploadFilter) {
         out.push(e);
-        }
+      }
     });
     $scope.$parent.deliveriesCount = out.length;
     $scope.totalCount[pid] = out.length;
@@ -459,7 +468,9 @@ function FolderViewCtrl($scope, user, PopupService) {
     $scope.deliveries = e.deliveries;
     $scope.deliveriesOrder = e.deliveriesOrder;
     $scope.deliveriesOrder[-2] = _.flatten($scope.deliveriesOrder);
-    $scope.profilesOrder = _.filter(e.profilesOrder, function(p) { return e !== null});
+    $scope.profilesOrder = _.filter(e.profilesOrder, function(p) {
+      return e !== null
+    });
     $scope.ownProfilesOrder = [];
    
     $scope.profilesCurrentOrder = [-2];
@@ -508,15 +519,222 @@ FolderDeliveryViewCtrl.$inject = ['$scope', 'userDataService', 'PopupService'];
 function BrowserViewCtrl($scope, $location, $routeParams, user) {
   if (!$scope.d.user) {
     $location.path("/home");
+    return;
   }
   
   $scope.categoryId = $routeParams.categoryId;
   
   user.loadcategorytree(false, function() {
   
-  }, function() {
+    }, function() {
    
-  });
+    });
 }
 
 BrowserViewCtrl.$inject = ['$scope', '$location',  '$routeParams', 'userDataService'];
+
+function UploadViewCtrl($scope, $location, $routeParams, user) {
+  if (!$scope.d.user) {
+    $location.path("/home");
+    return;
+  }
+  
+  $scope.folder = $scope.d.folders[$routeParams.folderId];
+  
+  $scope.folderEditEnabled = ($scope.d.isAdmin==true) || (_.intersect($scope.folder.managers, $scope.d.user.profileGroups).length>0);
+  $scope.folderUploadEnabled = $scope.folderEditEnabled || ($scope.d.isAdmin==true) || (_.intersect($scope.folder.uploaders, $scope.d.user.profileGroups).length>0);
+
+  if (!$scope.folderEditEnabled && !$scope.folderUploadEnabled) {
+    $location.path("/home");
+    return;
+  }
+  $scope.folderId = $routeParams.folderId;
+  $scope.categoryId = $routeParams.categoryId;
+  $scope.groupingId = $routeParams.groupingId;
+  $scope.eventId = $routeParams.eventId;
+  
+  if ($scope.folderEditEnabled) {
+    $scope.uploadProfileGroups = $scope.folder.uploaders;
+    $scope.uploadProfiles = [];
+    angular.forEach($scope.uploadProfileGroups, function(e) {
+      //console.log("profileGroup: "+e);
+      _.each($scope.d.profiles, function(p, key) {
+        //console.log("   "+key+": profileGroupId="+p.profileGroupId);
+        if (p.profileGroupId == e) {
+          $scope.uploadProfiles.push(key);
+        //console.log("         hit!");
+        }
+      })
+    });
+  }
+  else {
+    $scope.uploadProfileGroups = _.intersect($scope.folder.uploaders, $scope.d.user.profileGroups);
+    $scope.uploadProfiles = _.filter($scope.d.user.profiles[$scope.d.snapshotId], function(e) {
+      return _.include($scope.uploadProfileGroups, $scope.d.profiles[e].profileGroupId);
+    });
+  }
+  
+  $scope.getProfileName = function(e) {
+    if (angular.isDefined($scope.d.profiles) == false) return "";
+    return $scope.d.profileGroups[$scope.d.profiles[e].profileGroupId].displayName[$scope.d.user.gender] + " " + $scope.d.profiles[e].displayName;
+  }
+  
+  if (_.include($scope.uploadProfiles, $scope.d.profileId)) {
+    $scope.profileId = $scope.d.profileId;
+  }
+  else {
+    $scope.profileId = $scope.uploadProfiles[0];
+  }
+  $scope.uploadProgress = 0;
+  $scope.uploadStatus = {};
+  $scope.uploadStatusData = {};
+  $scope.uploadStatusProgress = {};
+  $scope.uploadFiles = [];
+  $scope.uploadDescriptions = {};
+  $scope.ready = true;
+  
+  $scope.formatSize =  function (bytes) {
+    if (typeof bytes !== 'number') {
+      return '';
+    }
+    if (bytes >= 1000000000) {
+      return (bytes / 1000000000).toFixed(2) + ' GB';
+    }
+    if (bytes >= 1000000) {
+      return (bytes / 1000000).toFixed(2) + ' MB';
+    }
+    return (bytes / 1000).toFixed(2) + ' KB';
+  }
+  
+  $scope.fileStatusIcon = function(s) {
+    return ['icon-time', 'icon-upload','icon-ok-circle','icon-exclamation-sign'][$scope.uploadStatus[s]];
+  }
+  
+  $scope.lastRequest = null;
+  
+  $('#fileupload').fileupload({
+    dataType: 'json',
+    
+    sequentialUploads: true,
+    
+    add: function (e, data) {
+      //console.log("ADD");
+      //console.dir(data);
+      
+      data.context = $scope.uploadFiles.length;
+      
+      $scope.$apply(function() {
+        $scope.uploadStatus[data.context] = 0;
+        $scope.uploadStatusProgress[data.context] = 0;
+        $scope.uploadFiles.push(data);
+      });
+    },
+    send: function (e, data) {
+      //console.log("SEND");
+      //console.dir(data);
+      $scope.lastRequest = data.jqXHR;
+      
+      $scope.uploadStatus[data.context] = 1;
+    
+    },
+    done: function (e, data) {
+      //console.log("DONE");
+      //console.dir(data);
+      $scope.$apply(function() {
+        $scope.uploadStatus[data.context] = 2;
+      });
+      $scope.doUploadNext();
+    },
+    fail: function (e, data) {
+      //console.log("FAIL");
+      //console.dir(data);
+      
+      $scope.$apply(function() {
+        $scope.uploadStatus[data.context] = 3;
+      });
+    },
+    progress: function (e, data) {
+      $scope.$apply(function() {
+        $scope.uploadStatusData[data.context] = data;
+        $scope.uploadStatusProgress[data.context] = parseInt(data.loaded / data.total * 100, 10);
+      });
+    },
+    progressall: function (e, data) {
+      $scope.$apply(function() {
+        $scope.uploadProgress = parseInt(data.loaded / data.total * 100, 10);
+      });
+    },
+    formData: function(f) {
+      //console.log("FORMDATA");
+      //console.dir(f);
+      return [{
+        'name': 'profileId', 
+        'value': $scope.profileId
+      }, 
+
+      {
+        'name': 'folderId', 
+        'value': $scope.folderId
+      },
+
+      {
+        'name': 'description', 
+        'value': $scope.description
+      }];
+    }
+  });
+  $scope.prepareFilename = function(f) {
+    var desc = $scope.uploadDescriptions[f.context];
+        
+    var d = /(.*)\.[^.]+$/.exec(f);
+    if (d.length==2) {
+      desc=d[1];
+    }
+    else {
+      desc=f;
+    }
+  
+    desc = desc.replace(/_/g, " ");
+    return desc;
+  }
+  $scope.doUploadNext = function(e) {
+    var found = false;
+    angular.forEach($scope.uploadFiles, function(f) {
+      if (!found && $scope.uploadStatus[f.context] == 0) {
+        $scope.ready = false;
+        $scope.description = $scope.uploadDescriptions[f.context];
+        if (!angular.isDefined($scope.description) || $scope.description.length==0) {
+          $scope.description = $scope.prepareFilename(f.files[0].name)
+        }
+        f.submit();
+        found = true;
+      }
+    });
+    if (found == false) {
+      $scope.$apply(function() {
+        $scope.lastRequest = null;
+        $scope.ready = true;
+      });
+    }
+    if (angular.isDefined(e)) {
+      e.stopPropagation();
+    }
+  }
+  $scope.cancelUpload = function() {
+    if ($scope.lastRequest != null) {
+      $scope.lastRequest.abort();
+      $scope.lastRequest = null;
+    }
+  }
+  $scope.removeFile = function(e) {
+    var i;
+    for (i=0;i<$scope.uploadFiles.length;i++) {
+      if ($scope.uploadFiles[i].context == e) {
+        $scope.uploadFiles.splice(i,1);
+        return;
+      }
+    }
+  }
+}
+
+UploadViewCtrl.$inject = ['$scope', '$location',  '$routeParams', 'userDataService'];
