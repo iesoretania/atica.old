@@ -87,7 +87,7 @@
       <parameter name="scope_column" value="snapshot_id" />
     </behavior>
   </table>
-  <table name="completed_event" phpName="CompletedEvent" idMethod="native">
+  <table name="completed_event" phpName="CompletedEvent" idMethod="native" heavyIndexing="true">
     <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="completed_date" phpName="CompletedDate" type="DATE" required="true"/>
@@ -132,7 +132,7 @@
       <parameter name="rank_column" value="order_nr" />
     </behavior>
   </table>
-  <table name="folder_delivery" phpName="FolderDelivery" idMethod="native">
+  <table name="folder_delivery" phpName="FolderDelivery" idMethod="native" heavyIndexing="true">
     <column name="folder_id" phpName="FolderId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="delivery_id" phpName="DeliveryId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
@@ -160,7 +160,7 @@
     <column name="profile_id" phpName="ProfileId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="display_name" phpName="DisplayName" type="VARCHAR" size="255" required="true" primaryString="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
-    <column name="creation_date" phpName="CreationDate" type="DATE" required="true"/>
+    <column name="creation_date" phpName="CreationDate" type="TIMESTAMP" required="true"/>
     <column name="current_revision_id" phpName="CurrentRevisionId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="public_token" phpName="PublicToken" type="VARCHAR" size="45" required="false"/>
     <foreign-key foreignTable="profile" name="delivery_profile_id_fk" onUpdate="CASCADE" onDelete="CASCADE">
@@ -188,6 +188,8 @@
     <column name="download_filename" phpName="DownloadFilename" type="VARCHAR" size="255" required="true"/>
     <column name="extension_id" phpName="ExtensionId" type="VARCHAR" size="45" required="false"/>
     <column name="download_path" phpName="DownloadPath" type="LONGVARCHAR" required="true"/>
+    <column name="download_filesize" phpName="DownloadFilesize" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="binary_data" phpName="BinaryData" type="BLOB" required="false"/>
     <foreign-key foreignTable="file_extension" name="document_extension_fk">
       <reference local="extension_id" foreign="id"/>
     </foreign-key>
@@ -211,7 +213,7 @@
     <column name="display_name" phpName="DisplayName" type="VARCHAR" size="255" required="true" primaryString="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
     <column name="from_week" phpName="FromWeek" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
-    <column name="to_week" phpName="ToWeek" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <column name="duration" phpName="Duration" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="is_automatic" phpName="IsAutomatic" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="is_manual" phpName="IsManual" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="true"/>
     <column name="is_visible" phpName="IsVisible" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="true"/>
@@ -221,15 +223,15 @@
     <index name="event_snapshot_id_fk">
       <index-column name="snapshot_id"/>
     </index>
-  </table>
-  <table name="event_delivery" phpName="EventDelivery" idMethod="native">
+  </table>    
+  <table name="event_delivery" phpName="EventDelivery" idMethod="native" heavyIndexing="true">
     <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="delivery_id" phpName="DeliveryId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
-    <foreign-key foreignTable="delivery" name="event_delivery_delivery_id_fk" onUpdate="CASCADE">
+    <foreign-key foreignTable="delivery" name="event_delivery_delivery_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="delivery_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="event" name="event_delivery_event_id_fk" onUpdate="CASCADE">
+    <foreign-key foreignTable="event" name="event_delivery_event_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="event_id" foreign="id"/>
     </foreign-key>
     <index name="event_delivery_event_id_fk">
@@ -239,7 +241,7 @@
       <index-column name="delivery_id"/>
     </index>
   </table>
-  <table name="event_folder" phpName="EventFolder" idMethod="native">
+  <table name="event_folder" phpName="EventFolder" idMethod="native" heavyIndexing="true">
     <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="folder_id" phpName="FolderId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
@@ -257,6 +259,56 @@
       <index-column name="folder_id"/>
     </index>
   </table>
+  <table name="activity" phpName="Activity" idMethod="native">
+    <column name="id" phpName="Id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="snapshot_id" phpName="SnapshotId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <column name="display_name" phpName="DisplayName" type="VARCHAR" size="255" required="true" primaryString="true"/>
+    <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
+    <foreign-key foreignTable="snapshot" name="activity_snapshot_id_fk">
+      <reference local="snapshot_id" foreign="id"/>
+    </foreign-key>
+    <index name="activity_snapshot_id_fk">
+      <index-column name="snapshot_id"/>
+    </index>
+  </table>
+  <table name="activity_event" phpName="ActivityEvent" idMethod="native" heavyIndexing="true">
+    <column name="activity_id" phpName="ActivityId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+    <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+    <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <foreign-key foreignTable="activity" name="activity_event_activity_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="activity_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="event" name="activity_event_event_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="event_id" foreign="id"/>
+    </foreign-key>
+    <index name="activity_event_event_id_fk">
+      <index-column name="event_id"/>
+    </index>
+    <index name="activity_event_activity_id_fk">
+      <index-column name="activity_id"/>
+    </index>
+    <behavior name="sortable">
+      <parameter name="rank_column" value="order_nr" />
+      <parameter name="use_scope" value="true" />
+      <parameter name="scope_column" value="activity_id" />
+    </behavior>
+  </table>
+  <table name="activity_profile_group" phpName="ActivityProfileGroup" idMethod="native" heavyIndexing="true">
+    <column name="activity_id" phpName="ActivityId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+    <column name="profile_group_id" phpName="ProfileGroupId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+    <foreign-key foreignTable="activity" name="activity_profile_group_activity_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="activity_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="profile_group" name="activity_profile_group_event_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="profile_group_id" foreign="id"/>
+    </foreign-key>
+    <index name="activity_profile_group_event_id_fk">
+      <index-column name="activity_id"/>
+    </index>
+    <index name="activity_profile_group_profile_group_id_fk">
+      <index-column name="profile_group_id"/>
+    </index>
+  </table>
   <table name="file_extension" phpName="FileExtension" idMethod="native">
     <column name="id" phpName="Id" type="VARCHAR" size="45" primaryKey="true" required="true"/>
     <column name="mime" phpName="Mime" type="VARCHAR" size="255" required="true"/>
@@ -265,7 +317,7 @@
     <column name="icon" phpName="Icon" type="VARCHAR" size="255" required="true"/>
     <column name="convertible" phpName="Convertible" type="BOOLEAN" size="1" required="true" defaultValue="false"/>
   </table>
-  <table name="category_folder" phpName="CategoryFolder" idMethod="native">
+  <table name="category_folder" phpName="CategoryFolder" idMethod="native" heavyIndexing="true">
     <column name="category_id" phpName="CategoryId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="folder_id" phpName="FolderId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
@@ -294,13 +346,14 @@
     <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="display_name" phpName="DisplayName" type="VARCHAR" size="255" required="true" primaryString="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
-    <column name="is_store" phpName="IsStore" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="is_divided" phpName="IsDivided" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="is_private" phpName="IsPrivate" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="filter" phpName="Filter" type="VARCHAR" size="255" required="false"/>
     <column name="filter_description" phpName="FilterDescription" type="LONGVARCHAR" required="false"/>
     <column name="mandatory_review" phpName="MandatoryReview" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true"/>
     <column name="mandatory_approval" phpName="MandatoryApproval" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true"/>
+    <column name="review_notes" phpName="ReviewNotes" type="LONGVARCHAR" required="false"/>
+    <column name="approval_notes" phpName="ApprovalNotes" type="LONGVARCHAR" required="false"/>
     <column name="show_revision_nr" phpName="ShowRevisionNr" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="autoclean" phpName="Autoclean" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
     <column name="max_uploads" phpName="MaxUploads" type="INTEGER" sqlType="int(11) unsigned" required="true" defaultValue="0"/>
@@ -312,6 +365,7 @@
       <index-column name="snapshot_id"/>
     </index>
   </table>
+  <!--
   <table name="frequency" phpName="Frequency" idMethod="native">
     <column name="id" phpName="Id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="display_name" phpName="DisplayName" type="VARCHAR" size="45" required="true" primaryString="true"/>
@@ -337,23 +391,23 @@
     <index name="indicator_frequency_id_fk">
       <index-column name="frequency_id"/>
     </index>
-  </table>
+  </table>-->
   <table name="non_conformance" phpName="NonConformance" idMethod="native">
     <column name="id" phpName="Id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="snapshot_id" phpName="SnapshotId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="non_conformance_type_id" phpName="NonConformanceTypeId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="non_conformity_type_detail" phpName="NonConformityTypeDetail" type="VARCHAR" size="255" required="false"/>
-    <column name="code" phpName="Code" type="VARCHAR" size="45" required="true"/>
+    <!--column name="code" phpName="Code" type="VARCHAR" size="45" required="true"/-->
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
     <column name="opened_at" phpName="OpenedAt" type="DATE" required="true"/>
     <column name="opened_by" phpName="OpenedBy" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="closed_at" phpName="ClosedAt" type="DATE" required="false"/>
     <column name="closed_by" phpName="ClosedBy" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="close_comment" phpName="CloseComment" type="LONGVARCHAR" required="false"/>
-    <foreign-key foreignTable="person" name="non_conformance_closed_by_fk">
+    <foreign-key foreignTable="person" name="non_conformance_closed_by_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="closed_by" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="person" name="non_conformance_opened_by_fk">
+    <foreign-key foreignTable="person" name="non_conformance_opened_by_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="opened_by" foreign="id"/>
     </foreign-key>
     <foreign-key foreignTable="snapshot" name="non_conformance_snapshot_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
@@ -394,9 +448,11 @@
     <column name="token_expiration" phpName="TokenExpiration" type="TIMESTAMP" required="false"/>
     <column name="token_operation" phpName="TokenOperation" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="token_data" phpName="TokenData" type="VARCHAR" size="255" required="false"/>
+    <column name="bad_password_count" phpName="BadPasswordCount" type="INTEGER" sqlType="int(11) unsigned" required="true" default="0"/>
     <column name="blocked_access" phpName="BlockedAccess" type="TIMESTAMP" required="false"/>
+    <column name="last_login" phpName="LastLogin" type="TIMESTAMP" required="false"/>
   </table>
-  <table name="person_organization" phpName="PersonOrganization" idMethod="native">
+  <table name="person_organization" phpName="PersonOrganization" idMethod="native" heavyIndexing="true">
     <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="organization_id" phpName="OrganizationId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="is_active" phpName="IsActive" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="true"/>
@@ -425,7 +481,7 @@
       <index-column name="person_id"/>
     </index>
   </table>
-  <table name="person_profile" phpName="PersonProfile" idMethod="native">
+  <table name="person_profile" phpName="PersonProfile" idMethod="native" heavyIndexing="true">
     <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="profile_id" phpName="ProfileId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <foreign-key foreignTable="profile" name="person_profile_profile_fk" onDelete="CASCADE">
@@ -478,30 +534,31 @@
   <table name="revision" phpName="Revision" idMethod="native">
     <column name="id" phpName="Id" type="INTEGER" size="10" sqlType="int(10) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="delivery_id" phpName="DeliveryId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
-    <column name="revision_nr" phpName="RevisionNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
+    <column name="revision_nr" phpName="RevisionNr" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="uploader_person_id" phpName="UploaderPersonId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="reviewer_person_id" phpName="ReviewerPersonId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="approver_person_id" phpName="ApproverPersonId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
-    <column name="upload_date" phpName="UploadDate" type="DATE" required="true"/>
-    <column name="review_date" phpName="ReviewDate" type="DATE" required="false"/>
-    <column name="approval_date" phpName="ApprovalDate" type="DATE" required="false"/>
+    <column name="upload_date" phpName="UploadDate" type="TIMESTAMP" required="true"/>
+    <column name="review_date" phpName="ReviewDate" type="TIMESTAMP" required="false"/>
+    <column name="approval_date" phpName="ApprovalDate" type="TIMESTAMP" required="false"/>
     <column name="upload_comment" phpName="UploadComment" type="LONGVARCHAR" required="true"/>
     <column name="review_comment" phpName="ReviewComment" type="LONGVARCHAR" required="false"/>
     <column name="approval_comment" phpName="ApprovalComment" type="LONGVARCHAR" required="false"/>
     <column name="original_document" phpName="OriginalDocument" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
-    <column name="autogenerated_date" phpName="AutogeneratedDate" type="DATE" required="false"/>
+    <column name="autogenerated_date" phpName="AutogeneratedDate" type="TIMESTAMP" required="false"/>
     <column name="template" phpName="Template" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
     <column name="template_instance" phpName="TemplateInstance" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
-    <foreign-key foreignTable="person" name="revision_approver_person_id_fk">
+    <foreign-key foreignTable="person" name="revision_approver_person_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="approver_person_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="delivery" name="revision_delivery_id_fk">
+    <foreign-key foreignTable="delivery" name="revision_delivery_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="delivery_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="person" name="revision_reviewer_person_id_fk">
+    <foreign-key foreignTable="person" name="revision_reviewer_person_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="reviewer_person_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="person" name="revision_uploader_person_id_fk">
+    <foreign-key foreignTable="person" name="revision_uploader_person_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="uploader_person_id" foreign="id"/>
     </foreign-key>
     <index name="revision_delivery_id_fk">
@@ -516,44 +573,44 @@
     <index name="revision_approver_person_id_fk">
       <index-column name="approver_person_id"/>
     </index>
+    <behavior name="sortable">
+      <parameter name="rank_column" value="order_nr" />
+      <parameter name="use_scope" value="true" />
+      <parameter name="scope_column" value="delivery_id" />
+    </behavior>
   </table>
-  <table name="task" phpName="Task" idMethod="native">
-    <column name="id" phpName="id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+  <table name="grouping" phpName="Grouping" idMethod="native">
+    <column name="id" phpName="Id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
     <column name="snapshot_id" phpName="SnapshotId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
-    <column name="parent_task_id" phpName="ParentTaskId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="display_name" phpName="DisplayName" type="VARCHAR" size="255" required="true" primaryString="true"/>
-    <column name="user_action" phpName="UserAction" type="LONGVARCHAR" required="true"/>
     <column name="description" phpName="Description" type="LONGVARCHAR" required="false"/>
-    <foreign-key foreignTable="task" name="task_parent_task_id_fk">
-      <reference local="parent_task_id" foreign="id"/>
-    </foreign-key>
-    <foreign-key foreignTable="snapshot" name="task_snapshot_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+    <column name="guest_access" phpName="GuestAccess" type="BOOLEAN" size="1" sqlType="tinyint(1) unsigned" required="true" defaultValue="false"/>
+    <foreign-key foreignTable="snapshot" name="grouping_snapshot_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="snapshot_id" foreign="id"/>
     </foreign-key>
-    <index name="task_snapshot_id_fk">
+    <index name="grouping_snapshot_id_fk">
       <index-column name="snapshot_id"/>
-    </index>
-    <index name="task_parent_task_id_fk">
-      <index-column name="parent_task_id"/>
     </index>
     <behavior name="sortable">
       <parameter name="rank_column" value="order_nr" />
+      <parameter name="use_scope" value="true" />
+      <parameter name="scope_column" value="snapshot_id" />
     </behavior>     
   </table>
-  <table name="task_folder" phpName="TaskFolder" idMethod="native">
-    <column name="task_id" phpName="TaskId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+  <table name="grouping_folder" phpName="GroupingFolder" idMethod="native" heavyIndexing="true">
+    <column name="grouping_id" phpName="GroupingId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="folder_id" phpName="FolderId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="order_nr" phpName="OrderNr" type="INTEGER" sqlType="int(11) unsigned" required="true" defaultValue="0"/>
     <column name="alt_display_name" phpName="AltDisplayName" type="VARCHAR" size="255" required="false" primaryString="true"/>
     <foreign-key foreignTable="folder" name="activity_folder_folder_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="folder_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="task" name="activity_folder_task_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
-      <reference local="task_id" foreign="id"/>
+    <foreign-key foreignTable="grouping" name="activity_folder_grouping_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="grouping_id" foreign="id"/>
     </foreign-key>
-    <index name="activity_folder_activity_id_fk">
-      <index-column name="task_id"/>
+    <index name="activity_folder_grouping_id_fk">
+      <index-column name="grouping_id"/>
     </index>
     <index name="activity_folder_folder_id_fk">
       <index-column name="folder_id"/>
@@ -562,24 +619,24 @@
       <parameter name="rank_column" value="order_nr" />
     </behavior>
   </table>
-  <table name="task_profile_group" phpName="TaskProfileGroup" idMethod="native">
-    <column name="task_id" phpName="TaskId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+  <table name="grouping_profile_group" phpName="GroupingProfileGroup" idMethod="native" heavyIndexing="true">
+    <column name="grouping_id" phpName="GroupingId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="profile_group_id" phpName="ProfileGroupId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
-    <foreign-key foreignTable="profile_group" name="task_profile_group_profile_group_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+    <foreign-key foreignTable="profile_group" name="grouping_profile_group_profile_group_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="profile_group_id" foreign="id"/>
     </foreign-key>
-    <foreign-key foreignTable="task" name="task_profile_group_task_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
-      <reference local="task_id" foreign="id"/>
+    <foreign-key foreignTable="grouping" name="grouping_profile_group_grouping_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="grouping_id" foreign="id"/>
     </foreign-key>
-    <index name="task_profile_group_task_id">
-      <index-column name="task_id"/>
+    <index name="grouping_profile_group_grouping_id">
+      <index-column name="grouping_id"/>
     </index>
-    <index name="task_profile_group_profile_group_id">
+    <index name="grouping_profile_group_profile_group_id">
       <index-column name="profile_group_id"/>
     </index>
   </table>
-  <table name="event_profile_group" phpName="EventProfileGroup" idMethod="native">
-    <column name="event_id" phpName="TaskId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+  <table name="event_profile_group" phpName="EventProfileGroup" idMethod="native" heavyIndexing="true">
+    <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="profile_group_id" phpName="ProfileGroupId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <foreign-key foreignTable="profile_group" name="event_profile_group_profile_group_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="profile_group_id" foreign="id"/>
@@ -614,7 +671,7 @@
       <index-column name="permission"/>
     </index>
   </table>
-  <table name="action_person_group" phpName="ActionPersonGroup" idMethod="native">
+  <!--<table name="action_person_group" phpName="ActionPersonGroup" idMethod="native">
     <column name="action_id" phpName="ActionId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
     <foreign-key foreignTable="action" name="action_person_group_action_fk" onDelete="CASCADE" onUpdate="CASCADE">
@@ -629,16 +686,94 @@
     <index name="action_person_group_action_fk">
       <index-column name="person_id"/>
     </index>
-  </table>
+  </table>-->
   <table name="session" phpName="Session" idMethod="native">
     <column name="id" phpName="Id" type="VARCHAR" size="64" primaryKey="true" required="true"/>
     <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" required="true"/>
+    <column name="organization_id" phpName="OrganizationId" type="INTEGER" sqlType="int(11) unsigned" required="true"/>
     <column name="expiration" phpName="Expiration" type="TIMESTAMP" required="true"/>
-    <foreign-key foreignTable="person" name="session_person_fk">
+    <foreign-key foreignTable="person" name="session_person_fk" onDelete="CASCADE" onUpdate="CASCADE">
       <reference local="person_id" foreign="id"/>
     </foreign-key>
+    <foreign-key foreignTable="organization" name="session_organization_id_fk" onDelete="CASCADE" onUpdate="CASCADE">
+      <reference local="organization_id" foreign="id"/>
+    </foreign-key>
     <index name="session_person_fk">
-      <index-column name="person_id"/>
+      <index-column name="person_id"/>    
+    </index>
+    <index name="session_organization_id_fk">
+      <index-column name="organization_id"/>
+    </index>
+  </table>
+  <table name="log" phpName="Log" idMethod="native">
+    <column name="id" phpName="Id" type="INTEGER" sqlType="int(11) unsigned" primaryKey="true" autoIncrement="true" required="true"/>
+    <column name="ip" phpName="Ip" type="VARCHAR" size="32" required="false"/>
+    <column name="when" phpName="When" type="TIMESTAMP" required="true" />
+    <column name="person_id" phpName="PersonId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="organization_id" phpName="OrganizationId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="category_id" phpName="CategoryId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="grouping_id" phpName="GroupingId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="activity_id" phpName="ActivityId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="event_id" phpName="EventId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="folder_id" phpName="FolderId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="delivery_id" phpName="DeliveryId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="revision_id" phpName="RevisionId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="document_id" phpName="DocumentId" type="INTEGER" sqlType="int(11) unsigned" required="false"/>
+    <column name="kind" phpName="Kind" type="VARCHAR" size="255" required="false" />
+    <column name="detail" phpName="Detail" type="VARCHAR" size="255" required="false" primaryString="true"/>
+    <foreign-key foreignTable="person" name="log_person_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="person_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="organization" name="log_organization_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="organization_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="category" name="log_category_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="category_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="grouping" name="log_grouping_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="grouping_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="event" name="log_group_event_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="event_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="folder" name="log_folder_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="folder_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="delivery" name="log_delivery_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="delivery_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="revision" name="log_revision_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="revision_id" foreign="id"/>
+    </foreign-key>
+    <foreign-key foreignTable="document" name="log_document_id_fk" onDelete="SETNULL" onUpdate="CASCADE">
+      <reference local="document_id" foreign="id"/>
+    </foreign-key>
+    <index name="log_person_fk">
+      <index-column name="person_id"/>    
+    </index>
+    <index name="log_organization_id_fk">
+      <index-column name="organization_id"/>
+    </index>
+    <index name="log_category_id_fk">
+      <index-column name="category_id"/>
+    </index>
+    <index name="log_grouping_id_fk">
+      <index-column name="grouping_id"/>
+    </index>
+    <index name="log_group_event_id">
+      <index-column name="event_id"/>
+    </index>
+    <index name="log_folder_id_fk">
+      <index-column name="folder_id"/>
+    </index>
+    <index name="log_delivery_id_fk">
+      <index-column name="delivery_id"/>
+    </index>
+    <index name="log_revision_id_fk">
+      <index-column name="revision_id"/>
+    </index>
+    <index name="log_document_id_fk">
+      <index-column name="document_id"/>
     </index>
   </table>
 </database>

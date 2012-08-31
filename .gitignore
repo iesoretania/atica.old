@@ -6,3 +6,7 @@ build.xml
 .project
 .settings
 .idea/*
+server/config.inc.php
+server/build/conf/atica-conf.php
+server/build.properties
+server/runtime-conf.xml

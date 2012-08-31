@@ -635,6 +635,7 @@ function UploadViewCtrl($scope, $location, $routeParams, user) {
       $scope.lastRequest = data.jqXHR;
       
       $scope.uploadStatus[data.context] = 1;
+      $scope.uploadStatusProgress[data.context] = 100;
     
     },
     done: function (e, data) {

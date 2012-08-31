@@ -7,27 +7,27 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
     
     var accessToken = "";
     
-    var loginService = $resource('/~ixl03065/3to5/api/index.php/v1/auth');
+    var loginService = $resource('api/index.php/v1/auth');
     
-    var organizationService = $resource('/~ixl03065/3to5/api/index.php/v1/organization/:organization', {
+    var organizationService = $resource('api/index.php/v1/organization/:organization', {
       organization:'@Id'
     });
     
-    var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId');
+    var groupingService = $resource('api/index.php/v1/grouping/:groupId');
     
-    var snapshotDataService = $resource('/~ixl03065/3to5/api/index.php/v1/snapshotdata/:snapshotId');
+    var snapshotDataService = $resource('api/index.php/v1/snapshotdata/:snapshotId');
     
-    var folderService = $resource('/~ixl03065/3to5/api/index.php/v1/folder/:folderId');
+    var folderService = $resource('api/index.php/v1/folder/:folderId');
     
-    var refreshService = $resource('/~ixl03065/3to5/api/index.php/v1/refreshtoken', {
+    var refreshService = $resource('api/index.php/v1/refreshtoken', {
       token:'@token'
     });
     
-    var logoutService = $resource('/~ixl03065/3to5/api/index.php/v1/logout', {
+    var logoutService = $resource('api/index.php/v1/logout', {
       token:'@token'
     });
     
-    var categoryService = $resource('/~ixl03065/3to5/api/index.php/v1/category/:categoryId');
+    var categoryService = $resource('api/index.php/v1/category/:categoryId');
     
     var _scope = {};
     
@@ -35,10 +35,6 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
     _scope.groupings = {};
     
     var _getGrouping = function(groupId, fnOk, fnError) {
-      //console.log('Pidiendo grupo '+groupId);
-      /*var groupingService = $resource('/~ixl03065/3to5/api/index.php/v1/grouping/:groupId', {
-        'groupId':groupId
-      });*/
       return groupingService.query({},fnOk, fnError);
     }
     
@@ -47,14 +43,11 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
       angular.forEach(_scope.organizations, function(value, key) {
         if (value.id == org) {
           _scope.organization = value;
-          //console.log("Organización cambiada a "+value.id+". Cargando secciones");
           
           groupingService.get({
             'guest': value.id,
             'folders': 1
           }, function(e) {
-            //_scope.guestgroupings = e.groupings;
-            //_scope.guestfolders = e.folders;
             _scope.profileId = null;
             _scope.profiles = {};
             _scope.profiles[null] = {};
@@ -79,8 +72,6 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
     _scope.organization = undefined;
     
     _scope.organizations = organizationService.query(function(result) {
-      //console.log("organizations ok!");
-      //console.dir(_scope.organizations);
       if (_scope.organizations.length>0 && angular.isDefined(_scope.organization)==false) {
         _setOrganization(_scope.organizations[0].id);
       }
@@ -116,7 +107,6 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
         'token': accessToken
       }).$save();
       
-      //_scope.user=false;
       _setOrganization(_scope.organization.id);
     }
     
@@ -139,8 +129,8 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
             $timeout(doLogout, 0);
           }
           else {
-            //console.log('...error! Trying again in 1 minute');
-            tokenRefresh = $timeout(doTokenRefresh, 60000, false);
+            //console.log('...error! Trying again in 30 secs.');
+            tokenRefresh = $timeout(doTokenRefresh, 30000, false);
             tokenRefreshRetries = tokenRefreshRetries + 1;
           }
         }
@@ -259,7 +249,7 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           });
       },
       getdownloaddeliveryurl: function (id, id2) {
-        var r = "/~ixl03065/3to5/download.php?id="+encodeURI(id)+"&";
+        var r = "/server/download.php?id="+encodeURI(id)+"&";
         
         if (_scope.loaded) {
           r = r + "token=" + encodeURI(accessToken);
@@ -377,140 +367,6 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
 
 /*actualLogin: function() {
 
-        _scope.activities = {
-          23: {
-            organizationId: 1, 
-            displayName: "Evaluaciones trimestrales", 
-            description: "Documentos y registros que hay que usar en las revisiones trimestrales", 
-            folders: [120]
-          },
-          98: {
-            organizationId: 1, 
-            displayName: "Final de curso"
-          },
-          67: {
-            organizationId: 1, 
-            displayName: "F.C.T."
-          },
-          54: {
-            organizationId: 1, 
-            displayName: "Revisión del S.G.C."
-          }
-        };
-                                
-        _scope.folders = {
-          120:{
-            id: 120, 
-            categoryId: 20, 
-            displayName: "Modelos de programación", 
-            description: "Aquí se encuentran los modelos de documentos usados en el subproceso de Programación"
-          }
-        }
-                                
-        _scope.deliveries = {
-          120: {
-            55: {
-              id: 55,
-              profilegroupId: 1,
-              displayName: "MD750101PG_Modelo_de_programación_didáctica",
-              linkDeliveryId: null,
-              creationDate: 1323870961366,
-              uploaderPersonId: 5
-            },
-            65: {
-              id: 65,
-              profilegroupId: 1,
-              displayName: "MD750102PG_Modelo_de_revisión_de_programación_didáctica",
-              linkDeliveryId: null,
-              creationDate: 1323970961366,
-              uploaderPersonId: 5
-            }  
-          }
-        }
-        
-        _scope.users = {
-          5: {
-            displayName: "Luis Ramón López López"
-          }
-        }
-
-        _scope.profileGroups = {
-          1: {
-            id: 1, 
-            organizationId: 1, 
-            displayName: ["Coordinador", "Coordinadora", "Coordinador/a", "C"], 
-            activities: [54, 98], 
-            events: [3], 
-            documents: [8]
-          },
-          2: {
-            id: 2, 
-            organizationId: 1, 
-            displayName: ["Jefe de estudios", "Jefa de estudios", "Jefe/a de estudios", "JE"], 
-            activities: [23, 98], 
-            events: [7, 60], 
-            documents: [8, 34, 91], 
-            subprofileGroups: [23, 24]
-          },	
-          3: {
-            id: 3, 
-            organizationId: 1, 
-            displayName: ["Profesor", "Profesora", "Profesor/a", "P"], 
-            activities: [23, 98, 67], 
-            events: [3, 7, 17, 27, 53, 54, 60], 
-            documents: [8, 34, 91]
-          },	
-          4: {
-            id: 4, 
-            organizationId: 1, 
-            displayName: ["Director", "Directora", "Director/a", "D"], 
-            activities: [98], 
-            events: [17, 27], 
-            documents: [8, 34]
-          },
-          5: {
-            id: 5, 
-            organizationId: 1, 
-            displayName: ["Jefe de departamento", "Jefa de departamento", "Jefe/a de departamento", "JD"], 
-            activities: [98], 
-            events: [17, 27], 
-            documents: [8, 91], 
-            subprofileGroups: [56, 57]
-          }
-        };
-
-        _scope.profiles = {
-          11: {
-            id: 11, 
-            groupId: 3, 
-            displayName: ""
-          },
-          22: {
-            id: 22, 
-            groupId: 1, 
-            displayName: ""
-          },
-          23: {
-            id: 23, 
-            groupId: 2, 
-            displayName: "Diurno"
-          },
-          24: {
-            id: 24, 
-            groupId: 2, 
-            displayName: "Adjunto"
-          },
-          56: {
-            id: 56, 
-            groupId: 5, 
-            displayName: "Lengua"
-          },
-          57: {
-            id: 57, 
-            groupId: 5, 
-            displayName: "Matemáticas"
-          }
-        }
 
         _scope.news = [
         {
@@ -629,32 +485,3 @@ angular.module('aticaApp.services', ['ngResource'], function ($provide) {
           lastLogin: 1342870961366
         };
       },*/
-
- 
-/*_scope.organizations = {
-      1: {
-        displayName: 'I.E.S. Oretania'
-      },
-      2: {
-        displayName: 'I.E.S. Ntra. Sra. de la Cabeza'
-      }
-    };*/
-
-/*_scope.documents = {
-      8:  {
-        organizationId: 1, 
-        displayName: "Plan de centro"
-      },
-      34: {
-        organizationId: 1, 
-        displayName: "Criterios de correción"
-      },
-      91: {
-        organizationId: 1, 
-        displayName: "Banco de actividades"
-      }
-    };
-    
-    _scope.snapshots = {};
-
-    _scope.guestdocuments = [8, 34, 91];*/

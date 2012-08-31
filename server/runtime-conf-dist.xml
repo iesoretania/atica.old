@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <nolog>
+    <type>file</type>
+    <name>/home/admintic/propel.log</name>
+    <ident>propel-atica</ident>
+    <level>7</level>
+  </nolog>
+  <propel>
+    <datasources default="atica">
+      <datasource id="atica">
+        <adapter>mysql</adapter> <!-- sqlite, mysql, mssql, oracle, or pgsql -->
+        <connection>
+          <dsn>mysql:host=localhost;dbname=atica5</dsn>
+          <user>databaseuser</user>
+          <password>userpassword</password>
+          <settings>
+          	<setting id="charset">utf8</setting>
+          </settings>
+        </connection>
+      </datasource>
+    </datasources>
+  </propel>
+</config>
+
